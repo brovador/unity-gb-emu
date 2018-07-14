@@ -23,17 +23,38 @@ namespace brovador.GBEmulator {
 			public UInt16 PC;
 			public UInt16 SP;
 
-			public UInt16 AF { get { return (UInt16)(((UInt16)A) << 8 + F); } }
-			public UInt16 BC { get { return (UInt16)(((UInt16)B) << 8 + C); } }
-			public UInt16 DE { get { return (UInt16)(((UInt16)D) << 8 + E); } }
-			public UInt16 HL { get { return (UInt16)(((UInt16)H) << 8 + L); } }
-
-			public void Dec_HL() {
-				L-=1; if (L==255) H-=1;
+			public UInt16 AF { 
+				get { return (UInt16)(((UInt16)A) << 8 + F); } 
+				set { A = (byte)((value & 0xFF00) >> 8); F = (byte)(value & 0x00FF); }
+			}
+			public UInt16 BC { 
+				get { return (UInt16)(((UInt16)B) << 8 + C); } 
+				set { B = (byte)((value & 0xFF00) >> 8); C = (byte)(value & 0x00FF); }
+			}
+			public UInt16 DE { 
+				get { return (UInt16)(((UInt16)D) << 8 + E); } 
+				set { D = (byte)((value & 0xFF00) >> 8); E = (byte)(value & 0x00FF); }
+			}
+			public UInt16 HL { 
+				get { return (UInt16)(((UInt16)H) << 8 + L); } 
+				set { H = (byte)((value & 0xFF00) >> 8); L = (byte)(value & 0x00FF); }
 			}
 
-			public void Inc_HL() {
-				L+=1; if (L==0) H+=1;
+			public bool flagZ {
+				set { this.F = (byte)(value ? this.F & 0x80 : this.F & 0x80); }
+				get { return ((this.F & 0x80) != 0x00); }
+			}
+			public bool flagN {
+				set { this.F = (byte)(value ? this.F & 0x40 : this.F & 0x40); }
+				get { return ((this.F & 0x40) != 0x00); }
+			}
+			public bool flagH {
+				set { this.F = (byte)(value ? this.F & 0x20 : this.F & 0x20); }
+				get { return ((this.F & 0x20) != 0x00); }
+			}
+			public bool flagC {
+				set { this.F = (byte)(value ? this.F & 0x10 : this.F & 0x10); }
+				get { return ((this.F & 0x10) != 0x00); }
 			}
 		}
 
@@ -107,8 +128,7 @@ namespace brovador.GBEmulator {
 		}
 
 
-		void NOP() {}
-
+		#region 8bit loads
 
 		//ld-nn-n
 		void OP_06() { registers.B=mmu.Read(registers.PC++); } //LD B n
@@ -180,7 +200,7 @@ namespace brovador.GBEmulator {
 		//ld-a-n
 		void OP_0A() { registers.A=mmu.Read(registers.BC); } //LD A (BC)
 		void OP_1A() { registers.A=mmu.Read(registers.DE); } //LD A (DE)
-		void OP_FA() { registers.A=mmu.Read(mmu.ReadW(registers.PC));registers.PC+=2; } //LD A (nn)
+		void OP_FA() { registers.A=mmu.Read(mmu.ReadW(registers.PC+=2)); } //LD A (nn)
 		void OP_3E() { registers.A=mmu.Read(registers.PC++); } //LD A #
 
 		//ld-n-a
@@ -193,7 +213,7 @@ namespace brovador.GBEmulator {
 		void OP_02() { mmu.WriteW(registers.BC, registers.A); } //LD (BC) A
 		void OP_12() { mmu.WriteW(registers.DE, registers.A); } //LD (DE) A
 		void OP_77() { mmu.WriteW(registers.HL, registers.A); } //LD (HL) A
-		void OP_EA() { mmu.WriteW(registers.PC, registers.A);registers.PC+=2; } //LD (nn) A
+		void OP_EA() { mmu.WriteW(registers.PC+=2, registers.A); } //LD (nn) A
 
 		//ld-a-(c)
 		void OP_F2() { registers.A=mmu.Read((UInt16)(0xFF00 + registers.C)); } //LD A,($FF00+C)
@@ -202,22 +222,56 @@ namespace brovador.GBEmulator {
 		void OP_E2() { mmu.Write((UInt16)(0xFF00 + registers.C), registers.A); } //LD ($FF00+C),A
 
 		//ld-a-(hld)
-		void OP_3A() { registers.A=mmu.Read(registers.HL); registers.Dec_HL(); } //LD A,(HL-)
+		void OP_3A() { registers.A=mmu.Read(registers.HL); registers.HL--; } //LD A,(HL-)
 
 		//ld-(hld)-a
-		void OP_32() { mmu.Write(registers.HL, registers.A); registers.Dec_HL(); } //LD (HL-), A
+		void OP_32() { mmu.Write(registers.HL, registers.A); registers.HL--; } //LD (HL-), A
 
 		//ld-a-(hli)
-		void OP_2A() { registers.A=mmu.Read(registers.HL); registers.Inc_HL(); } //LD A,(HL+)
+		void OP_2A() { registers.A=mmu.Read(registers.HL); registers.HL++; } //LD A,(HL+)
 
 		//ld-(hli)-a
-		void OP_22() { mmu.Write(registers.HL, registers.A); registers.Inc_HL(); } //LD (HL+), A
+		void OP_22() { mmu.Write(registers.HL, registers.A); registers.HL++; } //LD (HL+), A
 
 		//ldh-(n)-a
 		void OP_E0() { mmu.Write((UInt16)(0xFF00 + mmu.Read(registers.PC++)), registers.A); } //LD ($FF00+n),A 
 
 		//ldh-a-(n)
 		void OP_F0() { registers.A = mmu.Read((UInt16)(0xFF00 + mmu.Read(registers.PC++))); } //LD A,($FF00+n)
+
+		#endregion
+
+		#region 16bit loads
+
+		//ld-n-nn
+		void OP_01() { registers.BC = mmu.ReadW(registers.PC++); } //LD BC,nn
+		void OP_11() { registers.DE = mmu.ReadW(registers.PC++); } //LD DE,nn
+		void OP_21() { registers.HL = mmu.ReadW(registers.PC++); } //LD HL,nn
+		void OP_31() { registers.SP = mmu.ReadW(registers.PC++); } //LD SP,nn
+
+		//ld-sp-hl
+		void OP_F9() { registers.SP = registers.HL; } //LD SP,HL
+
+		//ldhl-sp-n
+		//TODO: set flags carry and half-carry
+		void OP_F8() { registers.HL = (UInt16)(registers.SP + mmu.Read(registers.PC++)); registers.flagZ = false; registers.flagN = false; } //LDHL SP,n 
+
+		//ld-nn-sp
+		void OP_08() { mmu.WriteW(mmu.ReadW(registers.PC+=2), registers.SP); } //LD (nn),SP
+
+		//push-nn
+		void OP_F5() { registers.SP=registers.AF; registers.SP-= 2; }  //PUSH AF
+		void OP_C5() { registers.SP=registers.BC; registers.SP-= 2; }  //PUSH BC
+		void OP_D5() { registers.SP=registers.DE; registers.SP-= 2; }  //PUSH DE
+		void OP_E5() { registers.SP=registers.HL; registers.SP-= 2; }  //PUSH HL
+
+		//pop-nn
+		void OP_F1() { registers.AF=mmu.ReadW(registers.SP+=2); }  //POP AF
+		void OP_C1() { registers.BC=mmu.ReadW(registers.SP+=2); }  //POP BC
+		void OP_D1() { registers.DE=mmu.ReadW(registers.SP+=2); }  //POP DE
+		void OP_E1() { registers.HL=mmu.ReadW(registers.SP+=2); }  //POP HL
+
+		#endregion
 	}
 
 }
