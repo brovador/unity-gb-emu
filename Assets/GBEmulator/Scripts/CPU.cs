@@ -404,6 +404,32 @@ namespace brovador.GBEmulator {
 
 
 		#endregion
+
+		#region 16-bit ALU
+
+		//add-hl-n
+		void OP_09() { UInt16 tmp=registers.HL; registers.HL+=registers.BC; registers.flagN=false; registers.flagH=((registers.H&0x0F)<(((tmp&0xFF00)>>8)&0x0F)); registers.flagC=(tmp>registers.HL); } //ADD HL BC
+		void OP_19() { UInt16 tmp=registers.HL; registers.HL+=registers.DE; registers.flagN=false; registers.flagH=((registers.H&0x0F)<(((tmp&0xFF00)>>8)&0x0F)); registers.flagC=(tmp>registers.HL); } //ADD HL DE
+		void OP_29() { UInt16 tmp=registers.HL; registers.HL+=registers.HL; registers.flagN=false; registers.flagH=((registers.H&0x0F)<(((tmp&0xFF00)>>8)&0x0F)); registers.flagC=(tmp>registers.HL); } //ADD HL HL
+		void OP_39() { UInt16 tmp=registers.HL; registers.HL+=registers.SP; registers.flagN=false; registers.flagH=((registers.H&0x0F)<(((tmp&0xFF00)>>8)&0x0F)); registers.flagC=(tmp>registers.HL); } //ADD HL SP
+
+		//add-sp-n
+		#warning Check flags
+		void OP_E8() { registers.SP+=mmu.Read(registers.PC++); registers.flagZ=false; registers.flagN=false; }
+
+		//inc-nn
+		void OP_03() { registers.BC++; } //INC BC
+		void OP_13() { registers.DE++; } //INC DE
+		void OP_23() { registers.HL++; } //INC HL
+		void OP_33() { registers.SP++; } //INC SP
+
+		//dec-nn
+		void OP_0B() { registers.BC--; } //DEC BC
+		void OP_1B() { registers.DE--; } //DEC DE
+		void OP_2B() { registers.HL--; } //DEC HL
+		void OP_3B() { registers.SP--; } //DEC SP
+
+		#endregion
 	}
 
 }
