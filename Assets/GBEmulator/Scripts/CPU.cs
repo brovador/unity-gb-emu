@@ -30,20 +30,20 @@ namespace brovador.GBEmulator {
 			public UInt16 SP;
 
 			public UInt16 AF { 
-				get { return (UInt16)(((UInt16)A) << 8 + F); } 
-				set { A = (byte)((value & 0xFF00) >> 8); F = (byte)(value & 0x00FF); }
+				get { return (UInt16)(((UInt16)A << 8) + (UInt16)F); } 
+				set { A = (byte)(value >> 8 & 0x00FF); F = (byte)(value & 0x00FF); }
 			}
 			public UInt16 BC { 
-				get { return (UInt16)(((UInt16)B) << 8 + C); } 
-				set { B = (byte)((value & 0xFF00) >> 8); C = (byte)(value & 0x00FF); }
+				get {return (UInt16)(((UInt16)B << 8) + (UInt16)C); } 
+				set { B = (byte)(value >> 8 & 0x00FF); C = (byte)(value & 0x00FF); }
 			}
 			public UInt16 DE { 
-				get { return (UInt16)(((UInt16)D) << 8 + E); } 
+				get { return (UInt16)(((UInt16)D << 8) + (UInt16)E); } 
 				set { D = (byte)((value & 0xFF00) >> 8); E = (byte)(value & 0x00FF); }
 			}
 			public UInt16 HL { 
-				get { return (UInt16)(((UInt16)H) << 8 + L); } 
-				set { H = (byte)((value & 0xFF00) >> 8); L = (byte)(value & 0x00FF); }
+				get { return (UInt16)(((UInt16)H << 8) + (UInt16)L); } 
+				set { H = (byte)(value >> 8 & 0x00FF); L = (byte)(value & 0x00FF); }
 			}
 
 			public bool flagZ {
@@ -114,12 +114,12 @@ namespace brovador.GBEmulator {
 			timers.t = 0;
 			timers.m = 0;
 
-			registers.AF = 0x01B0; //0x01=GB/SGB, 0xFF=GBP, 0x11=GBC
-			registers.BC = 0x0013;
-			registers.DE = 0x00D8;
-			registers.HL = 0x014D;
-			registers.SP = 0xFFFE;
-			registers.PC = 0x0100;
+//			registers.AF = 0x01B0; //0x01=GB/SGB, 0xFF=GBP, 0x11=GBC
+//			registers.BC = 0x0013;
+//			registers.DE = 0x00D8;
+//			registers.HL = 0x014D;
+//			registers.SP = 0xFFFE;
+//			registers.PC = 0x0100;
 
 			operations = new System.Action[] {
 				OP_00,OP_01,OP_02,OP_03,OP_04,OP_05,OP_06,OP_07,OP_08,OP_09,OP_0A,OP_0B,OP_0C,OP_0D,OP_0E,OP_0F,
@@ -222,7 +222,7 @@ namespace brovador.GBEmulator {
 		//ld-a-n
 		void OP_0A() { registers.A=mmu.Read(registers.BC); } //LD A (BC)
 		void OP_1A() { registers.A=mmu.Read(registers.DE); } //LD A (DE)
-		void OP_FA() { registers.A=mmu.Read(mmu.ReadW(registers.PC+=2)); } //LD A (nn)
+		void OP_FA() { registers.A=mmu.Read(mmu.ReadW(registers.PC)); registers.PC+=2; } //LD A (nn)
 		void OP_3E() { registers.A=mmu.Read(registers.PC++); } //LD A #
 
 		//ld-n-a
@@ -235,7 +235,7 @@ namespace brovador.GBEmulator {
 		void OP_02() { mmu.WriteW(registers.BC, registers.A); } //LD (BC) A
 		void OP_12() { mmu.WriteW(registers.DE, registers.A); } //LD (DE) A
 		void OP_77() { mmu.WriteW(registers.HL, registers.A); } //LD (HL) A
-		void OP_EA() { mmu.WriteW(registers.PC+=2, registers.A); } //LD (nn) A
+		void OP_EA() { mmu.WriteW(registers.PC, registers.A); registers.PC+=2; } //LD (nn) A
 
 		//ld-a-(c)
 		void OP_F2() { registers.A=mmu.Read((UInt16)(0xFF00 + registers.C)); } //LD A,($FF00+C)
@@ -266,20 +266,21 @@ namespace brovador.GBEmulator {
 		#region 16bit loads
 
 		//ld-n-nn
-		void OP_01() { registers.BC=mmu.Read(registers.PC+=2); } //LD BC,nn
-		void OP_11() { registers.DE=mmu.Read(registers.PC+=2); } //LD DE,nn
-		void OP_21() { registers.HL=mmu.Read(registers.PC+=2); } //LD HL,nn
-		void OP_31() { registers.SP=mmu.ReadW(registers.PC+=2); } //LD SP,nn
+		void OP_01() { registers.BC=mmu.ReadW(registers.PC); registers.PC+=2; } //LD BC,nn
+		void OP_11() { registers.DE=mmu.ReadW(registers.PC); registers.PC+=2; } //LD DE,nn
+		void OP_21() { registers.HL=mmu.ReadW(registers.PC); registers.PC+=2; } //LD HL,nn
+		void OP_31() { registers.SP=mmu.ReadW(registers.PC); registers.PC+=2; } //LD SP,nn
 
 		//ld-sp-hl
 		void OP_F9() { registers.SP=registers.HL; } //LD SP,HL
 
 		//ldhl-sp-n
 		//TODO: set flags carry and half-carry
+		#warning fix signed jump
 		void OP_F8() { registers.HL=(UInt16)(registers.SP+mmu.Read(registers.PC++)); registers.flagZ=false; registers.flagN=false; } //LDHL SP,n 
 
 		//ld-nn-sp
-		void OP_08() { mmu.WriteW(mmu.ReadW(registers.PC+=2), registers.SP); } //LD (nn),SP
+		void OP_08() { mmu.WriteW(mmu.ReadW(registers.PC), registers.SP); registers.PC+=2; } //LD (nn),SP
 
 		//push-nn
 		void OP_F5() { mmu.WriteW(--registers.SP,registers.AF); registers.SP--; }// PUSH AF
@@ -288,10 +289,10 @@ namespace brovador.GBEmulator {
 		void OP_E5() { mmu.WriteW(--registers.SP,registers.HL); registers.SP--; }// PUSH HL
 
 		//pop-nn
-		void OP_F1() { registers.AF=mmu.ReadW(registers.SP+=2); }  //POP AF
-		void OP_C1() { registers.BC=mmu.ReadW(registers.SP+=2); }  //POP BC
-		void OP_D1() { registers.DE=mmu.ReadW(registers.SP+=2); }  //POP DE
-		void OP_E1() { registers.HL=mmu.ReadW(registers.SP+=2); }  //POP HL
+		void OP_F1() { registers.AF=mmu.ReadW(registers.SP); registers.SP+=2; }  //POP AF
+		void OP_C1() { registers.BC=mmu.ReadW(registers.SP); registers.SP+=2; }  //POP BC
+		void OP_D1() { registers.DE=mmu.ReadW(registers.SP); registers.SP+=2; }  //POP DE
+		void OP_E1() { registers.HL=mmu.ReadW(registers.SP); registers.SP+=2; }  //POP HL
 
 		#endregion
 
@@ -418,6 +419,7 @@ namespace brovador.GBEmulator {
 
 		//add-sp-n
 		#warning check flags
+		#warning fix signed jump
 		void OP_E8() { registers.SP+=mmu.Read(registers.PC++); registers.flagZ=false; registers.flagN=false; }
 
 		//inc-nn
@@ -541,9 +543,11 @@ namespace brovador.GBEmulator {
 		void OP_E9() { registers.PC = mmu.ReadW(registers.HL); }
 
 		//jr n
+		#warning fix signed jump
 		void OP_18() { registers.PC += mmu.Read(registers.PC++); }
 
 		//jr cc,n
+		#warning fix signed jump
 		void OP_20() { if (!registers.flagZ) { registers.PC += mmu.Read(registers.PC++); } else { registers.PC++; } }
 		void OP_28() { if (registers.flagZ) { registers.PC += mmu.Read(registers.PC++); } else { registers.PC++; } }
 		void OP_30() { if (!registers.flagC) { registers.PC += mmu.Read(registers.PC++); } else { registers.PC++; } }
@@ -578,17 +582,17 @@ namespace brovador.GBEmulator {
 		void OP_FF() { registers.SP-=2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x38; } //RST 38H
 
 		//ret
-		void OP_C9() { registers.PC=mmu.ReadW(registers.SP+=2); }
+		void OP_C9() { registers.PC=mmu.ReadW(registers.SP); registers.SP+=2; }
 
 		//ret cc
-		void OP_C0() { if (!registers.flagZ) { registers.PC=mmu.ReadW(registers.SP+=2); } }
-		void OP_C8() { if (registers.flagZ) { registers.PC=mmu.ReadW(registers.SP+=2); } }
-		void OP_D0() { if (!registers.flagC) { registers.PC=mmu.ReadW(registers.SP+=2); } }
-		void OP_D8() { if (registers.flagC) { registers.PC=mmu.ReadW(registers.SP+=2); } }
+		void OP_C0() { if (!registers.flagZ) { registers.PC=mmu.ReadW(registers.SP); registers.SP+=2; } }
+		void OP_C8() { if (registers.flagZ) { registers.PC=mmu.ReadW(registers.SP); registers.SP+=2; } }
+		void OP_D0() { if (!registers.flagC) { registers.PC=mmu.ReadW(registers.SP); registers.SP+=2; } }
+		void OP_D8() { if (registers.flagC) { registers.PC=mmu.ReadW(registers.SP); registers.SP+=2; } }
 
 		//ret
 		#warning jsGB restores all the registers here
-		void OP_D9() { registers.PC=mmu.ReadW(registers.SP+=2); ime = true; }
+		void OP_D9() { registers.PC=mmu.ReadW(registers.SP); registers.SP+=2; ime = true; }
 
 		#endregion
 
@@ -596,6 +600,7 @@ namespace brovador.GBEmulator {
 
 		void OP_CB() {
 			Debug.LogError("CB: Operation not yet implemented");
+			registers.PC++;
 		}
 
 		void OP_XX() {
