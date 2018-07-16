@@ -14,6 +14,10 @@ namespace brovador.GBEmulator {
 
 		public MMU mmu;
 
+		public bool halt { get; private set; }
+		public bool stop { get; private set; }
+		public bool ime { get; private set; }
+
 		public struct Timers {
 			public uint t;
 			public uint m;
@@ -102,25 +106,7 @@ namespace brovador.GBEmulator {
 		};
 
 
-		public System.Action[] operations;	
-//		public System.Action[] operations = {
-//			OP_00,OP_01,OP_02,OP_03,OP_04,OP_05,OP_06,OP_07,OP_08,OP_09,OP_0A,OP_0B,OP_0C,OP_0D,OP_0E,OP_0F,
-//			OP_10,OP_11,OP_12,OP_13,OP_14,OP_15,OP_16,OP_17,OP_18,OP_19,OP_1A,OP_1B,OP_1C,OP_1D,OP_1E,OP_1F,
-//			OP_20,OP_21,OP_22,OP_23,OP_24,OP_25,OP_26,OP_27,OP_28,OP_29,OP_2A,OP_2B,OP_2C,OP_2D,OP_2E,OP_2F,
-//			OP_30,OP_31,OP_32,OP_33,OP_34,OP_35,OP_36,OP_37,OP_38,OP_39,OP_3A,OP_3B,OP_3C,OP_3D,OP_3E,OP_3F,
-//			OP_40,OP_41,OP_42,OP_43,OP_44,OP_45,OP_46,OP_47,OP_48,OP_49,OP_4A,OP_4B,OP_4C,OP_4D,OP_4E,OP_4F,
-//			OP_50,OP_51,OP_52,OP_53,OP_54,OP_55,OP_56,OP_57,OP_58,OP_59,OP_5A,OP_5B,OP_5C,OP_5D,OP_5E,OP_5F,
-//			OP_60,OP_61,OP_62,OP_63,OP_64,OP_65,OP_66,OP_67,OP_68,OP_69,OP_6A,OP_6B,OP_6C,OP_6D,OP_6E,OP_6F,
-//			OP_70,OP_71,OP_72,OP_73,OP_74,OP_75,OP_76,OP_77,OP_78,OP_79,OP_7A,OP_7B,OP_7C,OP_7D,OP_7E,OP_7F,
-//			OP_80,OP_81,OP_82,OP_83,OP_84,OP_85,OP_86,OP_87,OP_88,OP_89,OP_8A,OP_8B,OP_8C,OP_8D,OP_8E,OP_8F,
-//			OP_90,OP_91,OP_92,OP_93,OP_94,OP_95,OP_96,OP_97,OP_98,OP_99,OP_9A,OP_9B,OP_9C,OP_9D,OP_9E,OP_9F,
-//			OP_A0,OP_A1,OP_A2,OP_A3,OP_A4,OP_A5,OP_A6,OP_A7,OP_A8,OP_A9,OP_AA,OP_AB,OP_AC,OP_AD,OP_AE,OP_AF,
-//			OP_B0,OP_B1,OP_B2,OP_B3,OP_B4,OP_B5,OP_B6,OP_B7,OP_B8,OP_B9,OP_BA,OP_BB,OP_BC,OP_BD,OP_BE,OP_BF,
-//			OP_C0,OP_C1,OP_C2,OP_C3,OP_C4,OP_C5,OP_C6,OP_C7,OP_C8,OP_C9,OP_CA,OP_CB,OP_CC,OP_CD,OP_CE,OP_CF,
-//			OP_D0,OP_D1,OP_D2,OP_D3,OP_D4,OP_D5,OP_D6,OP_D7,OP_D8,OP_D9,OP_DA,OP_DB,OP_DC,OP_DD,OP_DE,OP_DF,
-//			OP_E0,OP_E1,OP_E2,OP_E3,OP_E4,OP_E5,OP_E6,OP_E7,OP_E8,OP_E9,OP_EA,OP_EB,OP_EC,OP_ED,OP_EE,OP_EF,
-//			OP_F0,OP_F1,OP_F2,OP_F3,OP_F4,OP_F5,OP_F6,OP_F7,OP_F8,OP_F9,OP_FA,OP_FB,OP_FC,OP_FD,OP_FE,OP_FF
-//		};
+		public System.Action[] operations;
 
 		public CPU(MMU mmu) {
 			this.mmu = mmu;
@@ -135,7 +121,24 @@ namespace brovador.GBEmulator {
 			registers.SP = 0xFFFE;
 			registers.PC = 0x0100;
 
-			operations = new System.Action[256];
+			operations = new System.Action[] {
+				OP_00,OP_01,OP_02,OP_03,OP_04,OP_05,OP_06,OP_07,OP_08,OP_09,OP_0A,OP_0B,OP_0C,OP_0D,OP_0E,OP_0F,
+				OP_10,OP_11,OP_12,OP_13,OP_14,OP_15,OP_16,OP_17,OP_18,OP_19,OP_1A,OP_1B,OP_1C,OP_1D,OP_1E,OP_1F,
+				OP_20,OP_21,OP_22,OP_23,OP_24,OP_25,OP_26,OP_27,OP_28,OP_29,OP_2A,OP_2B,OP_2C,OP_2D,OP_2E,OP_2F,
+				OP_30,OP_31,OP_32,OP_33,OP_34,OP_35,OP_36,OP_37,OP_38,OP_39,OP_3A,OP_3B,OP_3C,OP_3D,OP_3E,OP_3F,
+				OP_40,OP_41,OP_42,OP_43,OP_44,OP_45,OP_46,OP_47,OP_48,OP_49,OP_4A,OP_4B,OP_4C,OP_4D,OP_4E,OP_4F,
+				OP_50,OP_51,OP_52,OP_53,OP_54,OP_55,OP_56,OP_57,OP_58,OP_59,OP_5A,OP_5B,OP_5C,OP_5D,OP_5E,OP_5F,
+				OP_60,OP_61,OP_62,OP_63,OP_64,OP_65,OP_66,OP_67,OP_68,OP_69,OP_6A,OP_6B,OP_6C,OP_6D,OP_6E,OP_6F,
+				OP_70,OP_71,OP_72,OP_73,OP_74,OP_75,OP_76,OP_77,OP_78,OP_79,OP_7A,OP_7B,OP_7C,OP_7D,OP_7E,OP_7F,
+				OP_80,OP_81,OP_82,OP_83,OP_84,OP_85,OP_86,OP_87,OP_88,OP_89,OP_8A,OP_8B,OP_8C,OP_8D,OP_8E,OP_8F,
+				OP_90,OP_91,OP_92,OP_93,OP_94,OP_95,OP_96,OP_97,OP_98,OP_99,OP_9A,OP_9B,OP_9C,OP_9D,OP_9E,OP_9F,
+				OP_A0,OP_A1,OP_A2,OP_A3,OP_A4,OP_A5,OP_A6,OP_A7,OP_A8,OP_A9,OP_AA,OP_AB,OP_AC,OP_AD,OP_AE,OP_AF,
+				OP_B0,OP_B1,OP_B2,OP_B3,OP_B4,OP_B5,OP_B6,OP_B7,OP_B8,OP_B9,OP_BA,OP_BB,OP_BC,OP_BD,OP_BE,OP_BF,
+				OP_C0,OP_C1,OP_C2,OP_C3,OP_C4,OP_C5,OP_C6,OP_C7,OP_C8,OP_C9,OP_CA,OP_CB,OP_CC,OP_CD,OP_CE,OP_CF,
+				OP_D0,OP_D1,OP_D2,OP_XX,OP_D4,OP_D5,OP_D6,OP_D7,OP_D8,OP_D9,OP_DA,OP_XX,OP_DC,OP_XX,OP_DE,OP_DF,
+				OP_E0,OP_E1,OP_E2,OP_XX,OP_XX,OP_E5,OP_E6,OP_E7,OP_E8,OP_E9,OP_EA,OP_XX,OP_XX,OP_XX,OP_EE,OP_EF,
+				OP_F0,OP_F1,OP_F2,OP_F3,OP_XX,OP_F5,OP_F6,OP_F7,OP_F8,OP_F9,OP_FA,OP_FB,OP_XX,OP_XX,OP_FE,OP_FF
+			};
 		}
 
 		public void Step()
@@ -414,7 +417,7 @@ namespace brovador.GBEmulator {
 		void OP_39() { UInt16 tmp=registers.HL; registers.HL+=registers.SP; registers.flagN=false; registers.flagH=((registers.H&0x0F)<(((tmp&0xFF00)>>8)&0x0F)); registers.flagC=(tmp>registers.HL); } //ADD HL SP
 
 		//add-sp-n
-		#warning Check flags
+		#warning check flags
 		void OP_E8() { registers.SP+=mmu.Read(registers.PC++); registers.flagZ=false; registers.flagN=false; }
 
 		//inc-nn
@@ -430,6 +433,178 @@ namespace brovador.GBEmulator {
 		void OP_3B() { registers.SP--; } //DEC SP
 
 		#endregion
+
+		#region misc functions
+
+		#warning misc->swap moved to CB instructions
+
+		//DAA
+		#warning review this one
+		void OP_27() {
+			registers.flagC = false;
+			registers.flagH = false;
+			if ((0x0F & registers.A) > 9 || registers.flagH)
+				registers.A += 0x06;
+			if (((0xF0 & registers.A) >> 4) > 9 || registers.flagC) {
+				registers.A += 0x60;
+				registers.flagC = true;
+			}
+			registers.flagZ = (registers.A == 0);
+		}
+
+		//cpl
+		void OP_2F() { registers.A=(byte)(~registers.A); registers.flagN=true; registers.flagH=true; }
+
+		//ccf
+		void OP_3F() { registers.flagC=!registers.flagC; registers.flagN=false; registers.flagH=false; }
+
+		//scf
+		void OP_37() { registers.flagC=true; registers.flagN=false; registers.flagH=false; }
+
+		//nop
+		void OP_00() {}
+
+		//halt
+		void OP_76() { halt = true; }
+
+		//stop
+		void OP_10() { stop = true; }
+
+		//di
+		void OP_F3() { ime = false; }
+
+		//ei
+		void OP_FB() { ime = true; }
+
+		#endregion
+
+		#region Rotates & shifts
+
+		//rlca
+		void OP_07() { 
+			registers.flagC = ((registers.A & 0x80) != 0); 
+			registers.A = (byte)((registers.A << 1) | ((registers.flagC?0x00:0x01) >> 7)); 
+			registers.flagZ = (registers.A == 0); 
+			registers.flagH = false; 
+			registers.flagN = false; 
+		}
+
+		//rla
+		void OP_17() {
+			bool flagC = registers.flagC;
+			registers.flagC = ((registers.A >> 7) != 0); 
+			registers.A = (byte)((registers.A << 1) | (flagC?0x01:0x00));
+			registers.flagZ = (registers.A == 0); 
+			registers.flagH = false; 
+			registers.flagN = false; 
+		}
+
+
+		//rrca
+		void OP_0F() { 
+			registers.flagC = ((registers.A & 0x01) != 0); 
+			registers.A = (byte)((registers.A >> 1) | ((registers.flagC?0x01:0x00) << 7)); 
+			registers.flagZ = (registers.A == 0); 
+			registers.flagH = false; 
+			registers.flagN = false; 
+		}
+
+		//rra
+		void OP_1F() {
+			bool flagC = registers.flagC;
+			registers.flagC = ((registers.A << 7) != 0); 
+			registers.A = (byte)((registers.A >> 1) | (flagC?0x80:0x00));
+			registers.flagZ = (registers.A == 0); 
+			registers.flagH = false; 
+			registers.flagN = false; 
+		}
+
+		#warning CB instructions RLCn, RLn, RRCn, RRn, SLAn, SRAn, SRLn
+		//TODO: implement
+		#warning CB instructions Bit: BITbr, SETbr, RESb,r 
+		//TODO: implement
+
+		#endregion
+
+		#region Jumps
+
+		//jp nn
+		void OP_C3() { registers.PC = mmu.ReadW(registers.PC); }
+
+		//jp cc,nn
+		void OP_C2() { if (!registers.flagZ) { registers.PC=mmu.ReadW(registers.PC); } else { registers.PC+=2; } }
+		void OP_CA() { if (registers.flagZ) { registers.PC=mmu.ReadW(registers.PC); } else { registers.PC+=2; } }
+		void OP_D2() { if (!registers.flagC) { registers.PC=mmu.ReadW(registers.PC); } else { registers.PC+=2; } }
+		void OP_DA() { if (registers.flagC) { registers.PC=mmu.ReadW(registers.PC); } else { registers.PC+=2; } }
+
+		//jp hl
+		void OP_E9() { registers.PC = mmu.ReadW(registers.HL); }
+
+		//jr n
+		void OP_18() { registers.PC += mmu.Read(registers.PC++); }
+
+		//jr cc,n
+		void OP_20() { if (!registers.flagZ) { registers.PC += mmu.Read(registers.PC++); } else { registers.PC++; } }
+		void OP_28() { if (registers.flagZ) { registers.PC += mmu.Read(registers.PC++); } else { registers.PC++; } }
+		void OP_30() { if (!registers.flagC) { registers.PC += mmu.Read(registers.PC++); } else { registers.PC++; } }
+		void OP_38() { if (registers.flagC) { registers.PC += mmu.Read(registers.PC++); } else { registers.PC++; } }
+
+		#endregion
+
+		#region Calls
+
+		//call nn
+		void OP_CD() { registers.SP-=2; mmu.WriteW(registers.SP, (byte)(registers.PC+2)); registers.PC=mmu.ReadW(registers.PC); }
+
+		//call cc,nn
+		void OP_C4() { if (!registers.flagZ) { registers.SP-=2; mmu.WriteW(registers.SP, (byte)(registers.PC+2)); registers.PC=mmu.ReadW(registers.PC); } else { registers.PC+=2; } }
+		void OP_CC() { if (registers.flagZ) { registers.SP-=2; mmu.WriteW(registers.SP, (byte)(registers.PC+2)); registers.PC=mmu.ReadW(registers.PC); } else { registers.PC+=2; } }
+		void OP_D4() { if (!registers.flagC) { registers.SP-=2; mmu.WriteW(registers.SP, (byte)(registers.PC+2)); registers.PC=mmu.ReadW(registers.PC); } else { registers.PC+=2; } }
+		void OP_DC() { if (registers.flagC) { registers.SP-=2; mmu.WriteW(registers.SP, (byte)(registers.PC+2)); registers.PC=mmu.ReadW(registers.PC); } else { registers.PC+=2; } }
+
+		#endregion
+
+		#region Restarts & returns
+
+		//rst
+		#warning jsGB saves here all the registers and rstore them on RETI
+		void OP_C7() { registers.SP-=2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x00; } //RST 00H
+		void OP_CF() { registers.SP-=2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x08; } //RST 08H
+		void OP_D7() { registers.SP-=2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x10; } //RST 10H
+		void OP_DF() { registers.SP-=2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x18; } //RST 18H
+		void OP_E7() { registers.SP-=2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x20; } //RST 20H
+		void OP_EF() { registers.SP-=2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x28; } //RST 28H
+		void OP_F7() { registers.SP-=2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x30; } //RST 30H
+		void OP_FF() { registers.SP-=2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x38; } //RST 38H
+
+		//ret
+		void OP_C9() { registers.PC=mmu.ReadW(registers.SP+=2); }
+
+		//ret cc
+		void OP_C0() { if (!registers.flagZ) { registers.PC=mmu.ReadW(registers.SP+=2); } }
+		void OP_C8() { if (registers.flagZ) { registers.PC=mmu.ReadW(registers.SP+=2); } }
+		void OP_D0() { if (!registers.flagC) { registers.PC=mmu.ReadW(registers.SP+=2); } }
+		void OP_D8() { if (registers.flagC) { registers.PC=mmu.ReadW(registers.SP+=2); } }
+
+		//ret
+		#warning jsGB restores all the registers here
+		void OP_D9() { registers.PC=mmu.ReadW(registers.SP+=2); ime = true; }
+
+		#endregion
+
+		#region CB operations
+
+		void OP_CB() {
+			Debug.LogError("CB: Operation not yet implemented");
+		}
+
+		void OP_XX() {
+			Debug.LogError(string.Format("Invalid operation received: {0}", registers.PC));
+			stop = true;
+		}
+
+		#endregion
 	}
+
 
 }
