@@ -150,6 +150,20 @@ namespace brovador.GBEmulator {
 		}
 
 
+		#region utils
+
+		byte DecodeSigned(byte b)
+		{
+			var result = b;
+			if (b > 127) {
+				b = (byte)(-(~b+1));
+			}
+			return result;
+		}
+
+		#endregion
+
+
 		#region 8bit loads
 
 		//ld-nn-n
@@ -275,9 +289,8 @@ namespace brovador.GBEmulator {
 		void OP_F9() { registers.SP=registers.HL; } //LD SP,HL
 
 		//ldhl-sp-n
-		//TODO: set flags carry and half-carry
-		#warning fix signed jump
-		void OP_F8() { registers.HL=(UInt16)(registers.SP+mmu.Read(registers.PC++)); registers.flagZ=false; registers.flagN=false; } //LDHL SP,n 
+		#warning set flags carry and half-carry? (jsGB doesn't do it)
+		void OP_F8() { registers.HL=(UInt16)(registers.SP+DecodeSigned(mmu.Read(registers.PC++))); registers.flagZ=false; registers.flagN=false; } //LDHL SP,n 
 
 		//ld-nn-sp
 		void OP_08() { mmu.WriteW(mmu.ReadW(registers.PC), registers.SP); registers.PC+=2; } //LD (nn),SP
@@ -418,9 +431,8 @@ namespace brovador.GBEmulator {
 		void OP_39() { UInt16 tmp=registers.HL; registers.HL+=registers.SP; registers.flagN=false; registers.flagH=((registers.H&0x0F)<(((tmp&0xFF00)>>8)&0x0F)); registers.flagC=(tmp>registers.HL); } //ADD HL SP
 
 		//add-sp-n
-		#warning check flags
-		#warning fix signed jump
-		void OP_E8() { registers.SP+=mmu.Read(registers.PC++); registers.flagZ=false; registers.flagN=false; }
+		#warning set flags carry and half-carry? (jsGB doesn't do it)
+		void OP_E8() { registers.SP+=DecodeSigned(mmu.Read(registers.PC++)); registers.flagZ=false; registers.flagN=false; }
 
 		//inc-nn
 		void OP_03() { registers.BC++; } //INC BC
@@ -437,8 +449,6 @@ namespace brovador.GBEmulator {
 		#endregion
 
 		#region misc functions
-
-		#warning misc->swap moved to CB instructions
 
 		//DAA
 		#warning review this one
@@ -520,12 +530,7 @@ namespace brovador.GBEmulator {
 			registers.flagH = false; 
 			registers.flagN = false; 
 		}
-
-		#warning CB instructions RLCn, RLn, RRCn, RRn, SLAn, SRAn, SRLn
-		//TODO: implement
-		#warning CB instructions Bit: BITbr, SETbr, RESb,r 
-		//TODO: implement
-
+		
 		#endregion
 
 		#region Jumps
@@ -543,12 +548,10 @@ namespace brovador.GBEmulator {
 		void OP_E9() { registers.PC = mmu.ReadW(registers.HL); }
 
 		//jr n
-		#warning fix signed jump
-		void OP_18() { registers.PC += mmu.Read(registers.PC++); }
+		void OP_18() { registers.PC += DecodeSigned(mmu.Read(registers.PC++)); }
 
 		//jr cc,n
-		#warning fix signed jump
-		void OP_20() { if (!registers.flagZ) { registers.PC += mmu.Read(registers.PC++); } else { registers.PC++; } }
+		void OP_20() { if (!registers.flagZ) { registers.PC += DecodeSigned(mmu.Read(registers.PC++)); } else { registers.PC++; } }
 		void OP_28() { if (registers.flagZ) { registers.PC += mmu.Read(registers.PC++); } else { registers.PC++; } }
 		void OP_30() { if (!registers.flagC) { registers.PC += mmu.Read(registers.PC++); } else { registers.PC++; } }
 		void OP_38() { if (registers.flagC) { registers.PC += mmu.Read(registers.PC++); } else { registers.PC++; } }
