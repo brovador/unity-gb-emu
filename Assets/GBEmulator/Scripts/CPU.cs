@@ -66,27 +66,8 @@ namespace brovador.GBEmulator {
 
 		public Timers timers;
 		public Registers registers;
-
-		public byte[] mTimes = {
-			1, 3, 1, 1, 1, 1, 2, 1, 3, 1, 1, 1, 1, 1, 2, 1,
-			2, 3, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1,
-			2, 3, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1,
-			2, 3, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 3, 3, 3, 1, 2, 1, 1, 1, 3, 1, 3, 3, 2, 1,
-			1, 1, 3, 0, 3, 1, 2, 1, 1, 1, 3, 0, 3, 0, 2, 1,
-			2, 1, 1, 0, 0, 1, 2, 1, 2, 1, 3, 0, 0, 0, 2, 1,
-			2, 1, 1, 1, 0, 1, 2, 1, 2, 1, 3, 1, 0, 0, 2, 1,
-		};
 			
-		public byte[] tTimes = {
+		public byte[] opcodeCycles = {
 			4,  12, 8,  8,  4,  4,  8,  4,  20, 8,  8,  8, 4,  4,  8, 4,
 			4,  12, 8,  8,  4,  4,  8,  4,  12, 8,  8,  8, 4,  4,  8, 4,
 			8,  12, 8,  8,  4,  4,  8,  4,  8,  8,  8,  8, 4,  4,  8, 4,
@@ -105,8 +86,28 @@ namespace brovador.GBEmulator {
 			12, 12, 8,  4,  0,  16, 8,  16, 12, 8,  16, 4, 0,  0,  8, 16,	
 		};
 
+		public byte[] opcodeCyclesCB = {
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8,
+			8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16, 8
+		};
+
 
 		public System.Action[] operations;
+		public System.Action[] cbOperations;
 
 		public CPU(MMU mmu) {
 			this.mmu = mmu;
@@ -139,29 +140,33 @@ namespace brovador.GBEmulator {
 				OP_E0,OP_E1,OP_E2,OP_XX,OP_XX,OP_E5,OP_E6,OP_E7,OP_E8,OP_E9,OP_EA,OP_XX,OP_XX,OP_XX,OP_EE,OP_EF,
 				OP_F0,OP_F1,OP_F2,OP_F3,OP_XX,OP_F5,OP_F6,OP_F7,OP_F8,OP_F9,OP_FA,OP_FB,OP_XX,OP_XX,OP_FE,OP_FF
 			};
+
+//			cbOperations = new System.Action[] {
+//				CB_00,CB_01,CB_02,CB_03,CB_04,CB_05,CB_06,CB_07,CB_08,CB_09,CB_0A,CB_0B,CB_0C,CB_0D,CB_0E,CB_0F,
+//				CB_10,CB_11,CB_12,CB_13,CB_14,CB_15,CB_16,CB_17,CB_18,CB_19,CB_1A,CB_1B,CB_1C,CB_1D,CB_1E,CB_1F,
+//				CB_20,CB_21,CB_22,CB_23,CB_24,CB_25,CB_26,CB_27,CB_28,CB_29,CB_2A,CB_2B,CB_2C,CB_2D,CB_2E,CB_2F,
+//				CB_30,CB_31,CB_32,CB_33,CB_34,CB_35,CB_36,CB_37,CB_38,CB_39,CB_3A,CB_3B,CB_3C,CB_3D,CB_3E,CB_3F,
+//				CB_40,CB_41,CB_42,CB_43,CB_44,CB_45,CB_46,CB_47,CB_48,CB_49,CB_4A,CB_4B,CB_4C,CB_4D,CB_4E,CB_4F,
+//				CB_50,CB_51,CB_52,CB_53,CB_54,CB_55,CB_56,CB_57,CB_58,CB_59,CB_5A,CB_5B,CB_5C,CB_5D,CB_5E,CB_5F,
+//				CB_60,CB_61,CB_62,CB_63,CB_64,CB_65,CB_66,CB_67,CB_68,CB_69,CB_6A,CB_6B,CB_6C,CB_6D,CB_6E,CB_6F,
+//				CB_70,CB_71,CB_72,CB_73,CB_74,CB_75,CB_76,CB_77,CB_78,CB_79,CB_7A,CB_7B,CB_7C,CB_7D,CB_7E,CB_7F,
+//				CB_80,CB_81,CB_82,CB_83,CB_84,CB_85,CB_86,CB_87,CB_88,CB_89,CB_8A,CB_8B,CB_8C,CB_8D,CB_8E,CB_8F,
+//				CB_90,CB_91,CB_92,CB_93,CB_94,CB_95,CB_96,CB_97,CB_98,CB_99,CB_9A,CB_9B,CB_9C,CB_9D,CB_9E,CB_9F,
+//				CB_A0,CB_A1,CB_A2,CB_A3,CB_A4,CB_A5,CB_A6,CB_A7,CB_A8,CB_A9,CB_AA,CB_AB,CB_AC,CB_AD,CB_AE,CB_AF,
+//				CB_B0,CB_B1,CB_B2,CB_B3,CB_B4,CB_B5,CB_B6,CB_B7,CB_B8,CB_B9,CB_BA,CB_BB,CB_BC,CB_BD,CB_BE,CB_BF,
+//				CB_C0,CB_C1,CB_C2,CB_C3,CB_C4,CB_C5,CB_C6,CB_C7,CB_C8,CB_C9,CB_CA,CB_CB,CB_CC,CB_CD,CB_CE,CB_CF,
+//				CB_D0,CB_D1,CB_D2,CB_D3,CB_D4,CB_D5,CB_D6,CB_D7,CB_D8,CB_D9,CB_DA,CB_DB,CB_DC,CB_DD,CB_DE,CB_DF,
+//				CB_E0,CB_E1,CB_E2,CB_E3,CB_E4,CB_E5,CB_E6,CB_E7,CB_E8,CB_E9,CB_EA,CB_EB,CB_EC,CB_ED,CB_EE,CB_EF,
+//				CB_F0,CB_F1,CB_F2,CB_F3,CB_F4,CB_F5,CB_F6,CB_F7,CB_F8,CB_F9,CB_FA,CB_FB,CB_FC,CB_FD,CB_FE,CB_FF
+//			}
 		}
 
 		public void Step()
 		{
 			var op = mmu.Read(registers.PC++);
 			operations[op]();
-			timers.t += tTimes[op];
-			timers.m += mTimes[op];
+			timers.t += opcodeCycles[op];
 		}
-
-
-		#region utils
-
-		byte DecodeSigned(byte b)
-		{
-			var result = b;
-			if (b > 127) {
-				b = (byte)(-(~b+1));
-			}
-			return result;
-		}
-
-		#endregion
 
 
 		#region 8bit loads
@@ -601,9 +606,275 @@ namespace brovador.GBEmulator {
 
 		#region CB operations
 
+		#warning review if cycles need to be adjusted (CB has 4 + instruction ones)
 		void OP_CB() {
-			Debug.LogError("CB: Operation not yet implemented");
-			registers.PC++;
+			var op = mmu.Read(++registers.PC);
+			cbOperations[op]();
+			timers.t += opcodeCyclesCB[op];
+		}
+
+		//swap
+		void CB_37() { byte tmp=registers.A; registers.A = (byte)(((tmp&0x0F)<<4)|((tmp&0xF0)>>4)); registers.flagZ=(registers.A==0); registers.flagN=false; registers.flagH=false; registers.flagC=false; }
+		void CB_30() { byte tmp=registers.B; registers.B = (byte)(((tmp&0x0F)<<4)|((tmp&0xF0)>>4)); registers.flagZ=(registers.B==0); registers.flagN=false; registers.flagH=false; registers.flagC=false; }
+		void CB_31() { byte tmp=registers.C; registers.C = (byte)(((tmp&0x0F)<<4)|((tmp&0xF0)>>4)); registers.flagZ=(registers.C==0); registers.flagN=false; registers.flagH=false; registers.flagC=false; }
+		void CB_32() { byte tmp=registers.D; registers.D = (byte)(((tmp&0x0F)<<4)|((tmp&0xF0)>>4)); registers.flagZ=(registers.D==0); registers.flagN=false; registers.flagH=false; registers.flagC=false; }
+		void CB_33() { byte tmp=registers.E; registers.E = (byte)(((tmp&0x0F)<<4)|((tmp&0xF0)>>4)); registers.flagZ=(registers.E==0); registers.flagN=false; registers.flagH=false; registers.flagC=false; }
+		void CB_34() { byte tmp=registers.H; registers.H = (byte)(((tmp&0x0F)<<4)|((tmp&0xF0)>>4)); registers.flagZ=(registers.H==0); registers.flagN=false; registers.flagH=false; registers.flagC=false; }
+		void CB_35() { byte tmp=registers.L; registers.L = (byte)(((tmp&0x0F)<<4)|((tmp&0xF0)>>4)); registers.flagZ=(registers.L==0); registers.flagN=false; registers.flagH=false; registers.flagC=false; }
+		void CB_36() { byte tmp=mmu.Read(registers.HL); mmu.Write(registers.HL,(byte)(((tmp&0x0F)<<4)|((tmp&0xF0)>>4))); registers.flagZ=(mmu.Read(registers.HL)==0); registers.flagN=false; registers.flagH=false; registers.flagC=false; }
+
+		//rlc
+		void CB_07() { registers.flagC=((registers.A & 0x80)!=0);  registers.A=(byte)((registers.A<<1)|((registers.flagC?0x00:0x01)>>7));  registers.flagZ=(registers.A==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_00() { registers.flagC=((registers.B & 0x80)!=0);  registers.B=(byte)((registers.B<<1)|((registers.flagC?0x00:0x01)>>7));  registers.flagZ=(registers.B==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_01() { registers.flagC=((registers.C & 0x80)!=0);  registers.C=(byte)((registers.C<<1)|((registers.flagC?0x00:0x01)>>7));  registers.flagZ=(registers.C==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_02() { registers.flagC=((registers.D & 0x80)!=0);  registers.D=(byte)((registers.D<<1)|((registers.flagC?0x00:0x01)>>7));  registers.flagZ=(registers.D==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_03() { registers.flagC=((registers.E & 0x80)!=0);  registers.E=(byte)((registers.E<<1)|((registers.flagC?0x00:0x01)>>7));  registers.flagZ=(registers.E==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_04() { registers.flagC=((registers.H & 0x80)!=0);  registers.H=(byte)((registers.H<<1)|((registers.flagC?0x00:0x01)>>7));  registers.flagZ=(registers.H==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_05() { registers.flagC=((registers.L & 0x80)!=0);  registers.L=(byte)((registers.L<<1)|((registers.flagC?0x00:0x01)>>7));  registers.flagZ=(registers.L==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_06() { registers.flagC=((mmu.Read(registers.HL) & 0x80)!=0);  mmu.Write(registers.HL, (byte)((mmu.Read(registers.HL)<<1)|((registers.flagC?0x00:0x01)>>7)));  registers.flagZ=(mmu.Read(registers.HL)==0);  registers.flagH=false;  registers.flagN=false; }
+
+
+		//rl
+		void CB_17() { bool flagC=registers.flagC; registers.flagC=((registers.A>>7)!= 0);  registers.A=(byte)((registers.A << 1)|(flagC?0x01:0x00)); registers.flagZ=(registers.A==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_10() { bool flagC=registers.flagC; registers.flagC=((registers.B>>7)!= 0);  registers.B=(byte)((registers.B << 1)|(flagC?0x01:0x00)); registers.flagZ=(registers.B==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_11() { bool flagC=registers.flagC; registers.flagC=((registers.C>>7)!= 0);  registers.C=(byte)((registers.C << 1)|(flagC?0x01:0x00)); registers.flagZ=(registers.C==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_12() { bool flagC=registers.flagC; registers.flagC=((registers.D>>7)!= 0);  registers.D=(byte)((registers.D << 1)|(flagC?0x01:0x00)); registers.flagZ=(registers.D==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_13() { bool flagC=registers.flagC; registers.flagC=((registers.E>>7)!= 0);  registers.E=(byte)((registers.E << 1)|(flagC?0x01:0x00)); registers.flagZ=(registers.E==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_14() { bool flagC=registers.flagC; registers.flagC=((registers.H>>7)!= 0);  registers.H=(byte)((registers.H << 1)|(flagC?0x01:0x00)); registers.flagZ=(registers.H==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_15() { bool flagC=registers.flagC; registers.flagC=((registers.L>>7)!= 0);  registers.L=(byte)((registers.L << 1)|(flagC?0x01:0x00)); registers.flagZ=(registers.L==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_16() { bool flagC=registers.flagC; registers.flagC=((mmu.Read(registers.HL)>>7)!= 0);  mmu.Write(registers.HL, (byte)((mmu.Read(registers.HL) << 1)|(flagC?0x01:0x00))); registers.flagZ=(mmu.Read(registers.HL)==0);  registers.flagH=false;  registers.flagN=false; }
+
+
+		//rrc
+		void CB_0F() { registers.flagC=((registers.A & 0x01)!=0);  registers.A=(byte)((registers.A>>1)|((registers.flagC?0x01:0x00)<<7));  registers.flagZ=(registers.A==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_08() { registers.flagC=((registers.B & 0x01)!=0);  registers.B=(byte)((registers.B>>1)|((registers.flagC?0x01:0x00)<<7));  registers.flagZ=(registers.B==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_09() { registers.flagC=((registers.C & 0x01)!=0);  registers.C=(byte)((registers.C>>1)|((registers.flagC?0x01:0x00)<<7));  registers.flagZ=(registers.C==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_0A() { registers.flagC=((registers.D & 0x01)!=0);  registers.D=(byte)((registers.D>>1)|((registers.flagC?0x01:0x00)<<7));  registers.flagZ=(registers.D==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_0B() { registers.flagC=((registers.E & 0x01)!=0);  registers.E=(byte)((registers.E>>1)|((registers.flagC?0x01:0x00)<<7));  registers.flagZ=(registers.E==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_0C() { registers.flagC=((registers.H & 0x01)!=0);  registers.H=(byte)((registers.H>>1)|((registers.flagC?0x01:0x00)<<7));  registers.flagZ=(registers.H==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_0D() { registers.flagC=((registers.L & 0x01)!=0);  registers.L=(byte)((registers.L>>1)|((registers.flagC?0x01:0x00)<<7));  registers.flagZ=(registers.L==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_0E() { registers.flagC=((mmu.Read(registers.HL) & 0x01)!=0);  mmu.Write(registers.HL, (byte)((mmu.Read(registers.HL)>>1)|((registers.flagC?0x01:0x00)<<7)));  registers.flagZ=(mmu.Read(registers.HL)==0);  registers.flagH=false;  registers.flagN=false; }
+
+
+		//rr
+		void CB_1F() { bool flagC=registers.flagC; registers.flagC=((registers.A<<7)!=0);  registers.A=(byte)((registers.A>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.A==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_18() { bool flagC=registers.flagC; registers.flagC=((registers.B<<7)!=0);  registers.B=(byte)((registers.B>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.B==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_19() { bool flagC=registers.flagC; registers.flagC=((registers.C<<7)!=0);  registers.C=(byte)((registers.C>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.C==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_1A() { bool flagC=registers.flagC; registers.flagC=((registers.D<<7)!=0);  registers.D=(byte)((registers.D>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.D==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_1B() { bool flagC=registers.flagC; registers.flagC=((registers.E<<7)!=0);  registers.E=(byte)((registers.E>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.E==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_1C() { bool flagC=registers.flagC; registers.flagC=((registers.H<<7)!=0);  registers.H=(byte)((registers.H>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.H==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_1D() { bool flagC=registers.flagC; registers.flagC=((registers.L<<7)!=0);  registers.L=(byte)((registers.L>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.L==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_1E() { bool flagC=registers.flagC; registers.flagC=((mmu.Read(registers.HL)<<7)!=0);  mmu.Write(registers.HL,(byte)((mmu.Read(registers.HL)>>1)|(flagC?0x80:0x00))); registers.flagZ=(mmu.Read(registers.HL)==0);  registers.flagH=false;  registers.flagN=false; }
+
+		//sla
+		void CB_27() { registers.flagC=((registers.A & 0x80)!=0);  registers.A=(byte)(registers.A<<1);  registers.flagZ=(registers.A==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_20() { registers.flagC=((registers.B & 0x80)!=0);  registers.B=(byte)(registers.B<<1);  registers.flagZ=(registers.B==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_21() { registers.flagC=((registers.C & 0x80)!=0);  registers.C=(byte)(registers.C<<1);  registers.flagZ=(registers.C==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_22() { registers.flagC=((registers.D & 0x80)!=0);  registers.D=(byte)(registers.D<<1);  registers.flagZ=(registers.D==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_23() { registers.flagC=((registers.E & 0x80)!=0);  registers.E=(byte)(registers.E<<1);  registers.flagZ=(registers.E==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_24() { registers.flagC=((registers.H & 0x80)!=0);  registers.H=(byte)(registers.H<<1);  registers.flagZ=(registers.H==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_25() { registers.flagC=((registers.L & 0x80)!=0);  registers.L=(byte)(registers.L<<1);  registers.flagZ=(registers.L==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_26() { registers.flagC=((mmu.Read(registers.HL) & 0x80)!=0);  mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)<<1));  registers.flagZ=(mmu.Read(registers.HL)==0);  registers.flagH=false;  registers.flagN=false; }
+
+
+		//sra
+		void CB_2F() { byte tmp=(byte)(registers.A&0x80); registers.flagC=((registers.A&0x01)!=0);  registers.A=(byte)((registers.A>>1)+tmp);  registers.flagZ=(registers.A==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_28() { byte tmp=(byte)(registers.B&0x80); registers.flagC=((registers.B&0x01)!=0);  registers.B=(byte)((registers.B>>1)+tmp);  registers.flagZ=(registers.B==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_29() { byte tmp=(byte)(registers.C&0x80); registers.flagC=((registers.C&0x01)!=0);  registers.C=(byte)((registers.C>>1)+tmp);  registers.flagZ=(registers.C==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_2A() { byte tmp=(byte)(registers.D&0x80); registers.flagC=((registers.D&0x01)!=0);  registers.D=(byte)((registers.D>>1)+tmp);  registers.flagZ=(registers.D==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_2B() { byte tmp=(byte)(registers.E&0x80); registers.flagC=((registers.E&0x01)!=0);  registers.E=(byte)((registers.E>>1)+tmp);  registers.flagZ=(registers.E==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_2C() { byte tmp=(byte)(registers.H&0x80); registers.flagC=((registers.H&0x01)!=0);  registers.H=(byte)((registers.H>>1)+tmp);  registers.flagZ=(registers.H==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_2D() { byte tmp=(byte)(registers.L&0x80); registers.flagC=((registers.L&0x01)!=0);  registers.L=(byte)((registers.L>>1)+tmp);  registers.flagZ=(registers.L==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_2E() { byte tmp=(byte)(mmu.Read(registers.HL)&0x80); registers.flagC=((mmu.Read(registers.HL)&0x01)!=0);  mmu.Write(registers.HL,(byte)((mmu.Read(registers.HL)>>1)+tmp));  registers.flagZ=(mmu.Read(registers.HL)==0);  registers.flagH=false;  registers.flagN=false; }
+
+
+		//srl
+		void CB_3F() { registers.flagC=((registers.A&0x01)!=0);  registers.A=(byte)(registers.A>>1);  registers.flagZ=(registers.A==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_38() { registers.flagC=((registers.B&0x01)!=0);  registers.B=(byte)(registers.B>>1);  registers.flagZ=(registers.B==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_39() { registers.flagC=((registers.C&0x01)!=0);  registers.C=(byte)(registers.C>>1);  registers.flagZ=(registers.C==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_3A() { registers.flagC=((registers.D&0x01)!=0);  registers.D=(byte)(registers.D>>1);  registers.flagZ=(registers.D==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_3B() { registers.flagC=((registers.E&0x01)!=0);  registers.E=(byte)(registers.E>>1);  registers.flagZ=(registers.E==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_3C() { registers.flagC=((registers.H&0x01)!=0);  registers.H=(byte)(registers.H>>1);  registers.flagZ=(registers.H==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_3D() { registers.flagC=((registers.L&0x01)!=0);  registers.L=(byte)(registers.L>>1);  registers.flagZ=(registers.L==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_3E() { registers.flagC=((mmu.Read(registers.HL)&0x01)!=0);  mmu.Write(registers.HL, (byte)(mmu.Read(registers.HL)>>1));  registers.flagZ=(mmu.Read(registers.HL)==0);  registers.flagH=false;  registers.flagN=false; }
+
+		//bit-n-r
+		//bit A
+		void CB_47() { registers.flagZ=((registers.A&0x01)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_4F() { registers.flagZ=((registers.A&0x02)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_57() { registers.flagZ=((registers.A&0x04)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_5F() { registers.flagZ=((registers.A&0x08)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_67() { registers.flagZ=((registers.A&0x10)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_6F() { registers.flagZ=((registers.A&0x20)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_77() { registers.flagZ=((registers.A&0x40)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_7F() { registers.flagZ=((registers.A&0x80)==0); registers.flagN=false; registers.flagH=true; }
+
+		//bit B
+		void CB_40() { registers.flagZ=((registers.B&0x01)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_48() { registers.flagZ=((registers.B&0x02)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_50() { registers.flagZ=((registers.B&0x04)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_58() { registers.flagZ=((registers.B&0x08)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_60() { registers.flagZ=((registers.B&0x10)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_68() { registers.flagZ=((registers.B&0x20)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_70() { registers.flagZ=((registers.B&0x40)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_78() { registers.flagZ=((registers.B&0x80)==0); registers.flagN=false; registers.flagH=true; }
+
+		//bit C
+		void CB_41() { registers.flagZ=((registers.C&0x01)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_49() { registers.flagZ=((registers.C&0x02)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_51() { registers.flagZ=((registers.C&0x04)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_59() { registers.flagZ=((registers.C&0x08)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_61() { registers.flagZ=((registers.C&0x10)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_69() { registers.flagZ=((registers.C&0x20)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_71() { registers.flagZ=((registers.C&0x40)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_79() { registers.flagZ=((registers.C&0x80)==0); registers.flagN=false; registers.flagH=true; }
+
+		//bit D
+		void CB_42() { registers.flagZ=((registers.D&0x01)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_4A() { registers.flagZ=((registers.D&0x02)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_52() { registers.flagZ=((registers.D&0x04)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_5A() { registers.flagZ=((registers.D&0x08)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_62() { registers.flagZ=((registers.D&0x10)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_6A() { registers.flagZ=((registers.D&0x20)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_72() { registers.flagZ=((registers.D&0x40)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_7A() { registers.flagZ=((registers.D&0x80)==0); registers.flagN=false; registers.flagH=true; }
+
+		//bit E
+		void CB_43() { registers.flagZ=((registers.E&0x01)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_4B() { registers.flagZ=((registers.E&0x02)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_53() { registers.flagZ=((registers.E&0x04)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_5B() { registers.flagZ=((registers.E&0x08)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_63() { registers.flagZ=((registers.E&0x10)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_6B() { registers.flagZ=((registers.E&0x20)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_73() { registers.flagZ=((registers.E&0x40)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_7B() { registers.flagZ=((registers.E&0x80)==0); registers.flagN=false; registers.flagH=true; }
+
+		//bit H
+		void CB_44() { registers.flagZ=((registers.H&0x01)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_4C() { registers.flagZ=((registers.H&0x02)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_54() { registers.flagZ=((registers.H&0x04)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_5C() { registers.flagZ=((registers.H&0x08)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_64() { registers.flagZ=((registers.H&0x10)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_6C() { registers.flagZ=((registers.H&0x20)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_74() { registers.flagZ=((registers.H&0x40)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_7C() { registers.flagZ=((registers.H&0x80)==0); registers.flagN=false; registers.flagH=true; }
+
+		//bit L
+		void CB_45() { registers.flagZ=((registers.L&0x01)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_4D() { registers.flagZ=((registers.L&0x02)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_55() { registers.flagZ=((registers.L&0x04)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_5D() { registers.flagZ=((registers.L&0x08)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_65() { registers.flagZ=((registers.L&0x10)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_6D() { registers.flagZ=((registers.L&0x20)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_75() { registers.flagZ=((registers.L&0x40)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_7D() { registers.flagZ=((registers.L&0x80)==0); registers.flagN=false; registers.flagH=true; }
+
+		//bit (HL)
+		void CB_46() { registers.flagZ=((mmu.Read(registers.HL)&0x01)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_4E() { registers.flagZ=((mmu.Read(registers.HL)&0x02)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_56() { registers.flagZ=((mmu.Read(registers.HL)&0x04)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_5E() { registers.flagZ=((mmu.Read(registers.HL)&0x08)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_66() { registers.flagZ=((mmu.Read(registers.HL)&0x10)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_6E() { registers.flagZ=((mmu.Read(registers.HL)&0x20)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_76() { registers.flagZ=((mmu.Read(registers.HL)&0x40)==0); registers.flagN=false; registers.flagH=true; }
+		void CB_7E() { registers.flagZ=((mmu.Read(registers.HL)&0x80)==0); registers.flagN=false; registers.flagH=true; }
+
+		//set A
+		void CB_C7() { registers.A=(byte)(registers.A|0x01); }
+		void CB_CF() { registers.A=(byte)(registers.A|0x02); }
+		void CB_D7() { registers.A=(byte)(registers.A|0x04); }
+		void CB_DF() { registers.A=(byte)(registers.A|0x08); }
+		void CB_E7() { registers.A=(byte)(registers.A|0x10); }
+		void CB_EF() { registers.A=(byte)(registers.A|0x20); }
+		void CB_F7() { registers.A=(byte)(registers.A|0x40); }
+		void CB_FF() { registers.A=(byte)(registers.A|0x80); }
+
+		//set B
+		void CB_C0() { registers.B=(byte)(registers.B|0x01); }
+		void CB_C8() { registers.B=(byte)(registers.B|0x02); }
+		void CB_D0() { registers.B=(byte)(registers.B|0x04); }
+		void CB_D8() { registers.B=(byte)(registers.B|0x08); }
+		void CB_E0() { registers.B=(byte)(registers.B|0x10); }
+		void CB_E8() { registers.B=(byte)(registers.B|0x20); }
+		void CB_F0() { registers.B=(byte)(registers.B|0x40); }
+		void CB_F8() { registers.B=(byte)(registers.B|0x80); }
+
+		//set C
+		void CB_C1() { registers.C=(byte)(registers.C|0x01); }
+		void CB_C9() { registers.C=(byte)(registers.C|0x02); }
+		void CB_D1() { registers.C=(byte)(registers.C|0x04); }
+		void CB_D9() { registers.C=(byte)(registers.C|0x08); }
+		void CB_E1() { registers.C=(byte)(registers.C|0x10); }
+		void CB_E9() { registers.C=(byte)(registers.C|0x20); }
+		void CB_F1() { registers.C=(byte)(registers.C|0x40); }
+		void CB_F9() { registers.C=(byte)(registers.C|0x80); }
+
+		//set D
+		void CB_C2() { registers.D=(byte)(registers.D|0x01); }
+		void CB_CA() { registers.D=(byte)(registers.D|0x02); }
+		void CB_D2() { registers.D=(byte)(registers.D|0x04); }
+		void CB_DA() { registers.D=(byte)(registers.D|0x08); }
+		void CB_E2() { registers.D=(byte)(registers.D|0x10); }
+		void CB_EA() { registers.D=(byte)(registers.D|0x20); }
+		void CB_F2() { registers.D=(byte)(registers.D|0x40); }
+		void CB_FA() { registers.D=(byte)(registers.D|0x80); }
+
+		//set E
+		void CB_C3() { registers.E=(byte)(registers.E|0x01); }
+		void CB_CB() { registers.E=(byte)(registers.E|0x02); }
+		void CB_D3() { registers.E=(byte)(registers.E|0x04); }
+		void CB_DB() { registers.E=(byte)(registers.E|0x08); }
+		void CB_E3() { registers.E=(byte)(registers.E|0x10); }
+		void CB_EB() { registers.E=(byte)(registers.E|0x20); }
+		void CB_F3() { registers.E=(byte)(registers.E|0x40); }
+		void CB_FB() { registers.E=(byte)(registers.E|0x80); }
+
+		//set H
+		void CB_C4() { registers.H=(byte)(registers.H|0x01); }
+		void CB_CC() { registers.H=(byte)(registers.H|0x02); }
+		void CB_D4() { registers.H=(byte)(registers.H|0x04); }
+		void CB_DC() { registers.H=(byte)(registers.H|0x08); }
+		void CB_E4() { registers.H=(byte)(registers.H|0x10); }
+		void CB_EC() { registers.H=(byte)(registers.H|0x20); }
+		void CB_F4() { registers.H=(byte)(registers.H|0x40); }
+		void CB_FC() { registers.H=(byte)(registers.H|0x80); }
+
+		//set L
+		void CB_C5() { registers.L=(byte)(registers.L|0x01); }
+		void CB_CD() { registers.L=(byte)(registers.L|0x02); }
+		void CB_D5() { registers.L=(byte)(registers.L|0x04); }
+		void CB_DD() { registers.L=(byte)(registers.L|0x08); }
+		void CB_E5() { registers.L=(byte)(registers.L|0x10); }
+		void CB_ED() { registers.L=(byte)(registers.L|0x20); }
+		void CB_F5() { registers.L=(byte)(registers.L|0x40); }
+		void CB_FD() { registers.L=(byte)(registers.L|0x80); }
+
+		//set (HL)
+		void CB_C6() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)|0x01)); }
+		void CB_CE() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)|0x02)); }
+		void CB_D6() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)|0x04)); }
+		void CB_DE() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)|0x08)); }
+		void CB_E6() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)|0x10)); }
+		void CB_EE() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)|0x20)); }
+		void CB_F6() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)|0x40)); }
+		void CB_FE() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)|0x80)); }
+
+
+		#endregion
+
+
+
+
+
+		#region Helpers & others
+
+		byte DecodeSigned(byte b)
+		{
+			var result = b;
+			if (b > 127) {
+				b = (byte)(-(~b+1));
+			}
+			return result;
 		}
 
 		void OP_XX() {
