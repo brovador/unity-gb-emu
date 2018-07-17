@@ -141,24 +141,24 @@ namespace brovador.GBEmulator {
 				OP_F0,OP_F1,OP_F2,OP_F3,OP_XX,OP_F5,OP_F6,OP_F7,OP_F8,OP_F9,OP_FA,OP_FB,OP_XX,OP_XX,OP_FE,OP_FF
 			};
 
-//			cbOperations = new System.Action[] {
-//				CB_00,CB_01,CB_02,CB_03,CB_04,CB_05,CB_06,CB_07,CB_08,CB_09,CB_0A,CB_0B,CB_0C,CB_0D,CB_0E,CB_0F,
-//				CB_10,CB_11,CB_12,CB_13,CB_14,CB_15,CB_16,CB_17,CB_18,CB_19,CB_1A,CB_1B,CB_1C,CB_1D,CB_1E,CB_1F,
-//				CB_20,CB_21,CB_22,CB_23,CB_24,CB_25,CB_26,CB_27,CB_28,CB_29,CB_2A,CB_2B,CB_2C,CB_2D,CB_2E,CB_2F,
-//				CB_30,CB_31,CB_32,CB_33,CB_34,CB_35,CB_36,CB_37,CB_38,CB_39,CB_3A,CB_3B,CB_3C,CB_3D,CB_3E,CB_3F,
-//				CB_40,CB_41,CB_42,CB_43,CB_44,CB_45,CB_46,CB_47,CB_48,CB_49,CB_4A,CB_4B,CB_4C,CB_4D,CB_4E,CB_4F,
-//				CB_50,CB_51,CB_52,CB_53,CB_54,CB_55,CB_56,CB_57,CB_58,CB_59,CB_5A,CB_5B,CB_5C,CB_5D,CB_5E,CB_5F,
-//				CB_60,CB_61,CB_62,CB_63,CB_64,CB_65,CB_66,CB_67,CB_68,CB_69,CB_6A,CB_6B,CB_6C,CB_6D,CB_6E,CB_6F,
-//				CB_70,CB_71,CB_72,CB_73,CB_74,CB_75,CB_76,CB_77,CB_78,CB_79,CB_7A,CB_7B,CB_7C,CB_7D,CB_7E,CB_7F,
-//				CB_80,CB_81,CB_82,CB_83,CB_84,CB_85,CB_86,CB_87,CB_88,CB_89,CB_8A,CB_8B,CB_8C,CB_8D,CB_8E,CB_8F,
-//				CB_90,CB_91,CB_92,CB_93,CB_94,CB_95,CB_96,CB_97,CB_98,CB_99,CB_9A,CB_9B,CB_9C,CB_9D,CB_9E,CB_9F,
-//				CB_A0,CB_A1,CB_A2,CB_A3,CB_A4,CB_A5,CB_A6,CB_A7,CB_A8,CB_A9,CB_AA,CB_AB,CB_AC,CB_AD,CB_AE,CB_AF,
-//				CB_B0,CB_B1,CB_B2,CB_B3,CB_B4,CB_B5,CB_B6,CB_B7,CB_B8,CB_B9,CB_BA,CB_BB,CB_BC,CB_BD,CB_BE,CB_BF,
-//				CB_C0,CB_C1,CB_C2,CB_C3,CB_C4,CB_C5,CB_C6,CB_C7,CB_C8,CB_C9,CB_CA,CB_CB,CB_CC,CB_CD,CB_CE,CB_CF,
-//				CB_D0,CB_D1,CB_D2,CB_D3,CB_D4,CB_D5,CB_D6,CB_D7,CB_D8,CB_D9,CB_DA,CB_DB,CB_DC,CB_DD,CB_DE,CB_DF,
-//				CB_E0,CB_E1,CB_E2,CB_E3,CB_E4,CB_E5,CB_E6,CB_E7,CB_E8,CB_E9,CB_EA,CB_EB,CB_EC,CB_ED,CB_EE,CB_EF,
-//				CB_F0,CB_F1,CB_F2,CB_F3,CB_F4,CB_F5,CB_F6,CB_F7,CB_F8,CB_F9,CB_FA,CB_FB,CB_FC,CB_FD,CB_FE,CB_FF
-//			}
+			cbOperations = new System.Action[] {
+				CB_00,CB_01,CB_02,CB_03,CB_04,CB_05,CB_06,CB_07,CB_08,CB_09,CB_0A,CB_0B,CB_0C,CB_0D,CB_0E,CB_0F,
+				CB_10,CB_11,CB_12,CB_13,CB_14,CB_15,CB_16,CB_17,CB_18,CB_19,CB_1A,CB_1B,CB_1C,CB_1D,CB_1E,CB_1F,
+				CB_20,CB_21,CB_22,CB_23,CB_24,CB_25,CB_26,CB_27,CB_28,CB_29,CB_2A,CB_2B,CB_2C,CB_2D,CB_2E,CB_2F,
+				CB_30,CB_31,CB_32,CB_33,CB_34,CB_35,CB_36,CB_37,CB_38,CB_39,CB_3A,CB_3B,CB_3C,CB_3D,CB_3E,CB_3F,
+				CB_40,CB_41,CB_42,CB_43,CB_44,CB_45,CB_46,CB_47,CB_48,CB_49,CB_4A,CB_4B,CB_4C,CB_4D,CB_4E,CB_4F,
+				CB_50,CB_51,CB_52,CB_53,CB_54,CB_55,CB_56,CB_57,CB_58,CB_59,CB_5A,CB_5B,CB_5C,CB_5D,CB_5E,CB_5F,
+				CB_60,CB_61,CB_62,CB_63,CB_64,CB_65,CB_66,CB_67,CB_68,CB_69,CB_6A,CB_6B,CB_6C,CB_6D,CB_6E,CB_6F,
+				CB_70,CB_71,CB_72,CB_73,CB_74,CB_75,CB_76,CB_77,CB_78,CB_79,CB_7A,CB_7B,CB_7C,CB_7D,CB_7E,CB_7F,
+				CB_80,CB_81,CB_82,CB_83,CB_84,CB_85,CB_86,CB_87,CB_88,CB_89,CB_8A,CB_8B,CB_8C,CB_8D,CB_8E,CB_8F,
+				CB_90,CB_91,CB_92,CB_93,CB_94,CB_95,CB_96,CB_97,CB_98,CB_99,CB_9A,CB_9B,CB_9C,CB_9D,CB_9E,CB_9F,
+				CB_A0,CB_A1,CB_A2,CB_A3,CB_A4,CB_A5,CB_A6,CB_A7,CB_A8,CB_A9,CB_AA,CB_AB,CB_AC,CB_AD,CB_AE,CB_AF,
+				CB_B0,CB_B1,CB_B2,CB_B3,CB_B4,CB_B5,CB_B6,CB_B7,CB_B8,CB_B9,CB_BA,CB_BB,CB_BC,CB_BD,CB_BE,CB_BF,
+				CB_C0,CB_C1,CB_C2,CB_C3,CB_C4,CB_C5,CB_C6,CB_C7,CB_C8,CB_C9,CB_CA,CB_CB,CB_CC,CB_CD,CB_CE,CB_CF,
+				CB_D0,CB_D1,CB_D2,CB_D3,CB_D4,CB_D5,CB_D6,CB_D7,CB_D8,CB_D9,CB_DA,CB_DB,CB_DC,CB_DD,CB_DE,CB_DF,
+				CB_E0,CB_E1,CB_E2,CB_E3,CB_E4,CB_E5,CB_E6,CB_E7,CB_E8,CB_E9,CB_EA,CB_EB,CB_EC,CB_ED,CB_EE,CB_EF,
+				CB_F0,CB_F1,CB_F2,CB_F3,CB_F4,CB_F5,CB_F6,CB_F7,CB_F8,CB_F9,CB_FA,CB_FB,CB_FC,CB_FD,CB_FE,CB_FF
+			};
 		}
 
 		public void Step()
@@ -858,6 +858,86 @@ namespace brovador.GBEmulator {
 		void CB_EE() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)|0x20)); }
 		void CB_F6() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)|0x40)); }
 		void CB_FE() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)|0x80)); }
+
+		//res A
+		void CB_87() { registers.A=(byte)(registers.A&0xFE); }
+		void CB_8F() { registers.A=(byte)(registers.A&0xFD); }
+		void CB_97() { registers.A=(byte)(registers.A&0xFB); }
+		void CB_9F() { registers.A=(byte)(registers.A&0xF7); }
+		void CB_A7() { registers.A=(byte)(registers.A&0xEF); }
+		void CB_AF() { registers.A=(byte)(registers.A&0xDF); }
+		void CB_B7() { registers.A=(byte)(registers.A&0xBF); }
+		void CB_BF() { registers.A=(byte)(registers.A&0x7F); }
+
+		//res B
+		void CB_80() { registers.B=(byte)(registers.B&0xFE); }
+		void CB_88() { registers.B=(byte)(registers.B&0xFD); }
+		void CB_90() { registers.B=(byte)(registers.B&0xFB); }
+		void CB_98() { registers.B=(byte)(registers.B&0xF7); }
+		void CB_A0() { registers.B=(byte)(registers.B&0xEF); }
+		void CB_A8() { registers.B=(byte)(registers.B&0xDF); }
+		void CB_B0() { registers.B=(byte)(registers.B&0xBF); }
+		void CB_B8() { registers.B=(byte)(registers.B&0x7F); }
+
+		//res C
+		void CB_81() { registers.C=(byte)(registers.C&0xFE); }
+		void CB_89() { registers.C=(byte)(registers.C&0xFD); }
+		void CB_91() { registers.C=(byte)(registers.C&0xFB); }
+		void CB_99() { registers.C=(byte)(registers.C&0xF7); }
+		void CB_A1() { registers.C=(byte)(registers.C&0xEF); }
+		void CB_A9() { registers.C=(byte)(registers.C&0xDF); }
+		void CB_B1() { registers.C=(byte)(registers.C&0xBF); }
+		void CB_B9() { registers.C=(byte)(registers.C&0x7F); }
+
+		//res D
+		void CB_82() { registers.D=(byte)(registers.D&0xFE); }
+		void CB_8A() { registers.D=(byte)(registers.D&0xFD); }
+		void CB_92() { registers.D=(byte)(registers.D&0xFB); }
+		void CB_9A() { registers.D=(byte)(registers.D&0xF7); }
+		void CB_A2() { registers.D=(byte)(registers.D&0xEF); }
+		void CB_AA() { registers.D=(byte)(registers.D&0xDF); }
+		void CB_B2() { registers.D=(byte)(registers.D&0xBF); }
+		void CB_BA() { registers.D=(byte)(registers.D&0x7F); }
+
+		//res E
+		void CB_83() { registers.E=(byte)(registers.E&0xFE); }
+		void CB_8B() { registers.E=(byte)(registers.E&0xFD); }
+		void CB_93() { registers.E=(byte)(registers.E&0xFB); }
+		void CB_9B() { registers.E=(byte)(registers.E&0xF7); }
+		void CB_A3() { registers.E=(byte)(registers.E&0xEF); }
+		void CB_AB() { registers.E=(byte)(registers.E&0xDF); }
+		void CB_B3() { registers.E=(byte)(registers.E&0xBF); }
+		void CB_BB() { registers.E=(byte)(registers.E&0x7F); }
+
+		//res H
+		void CB_84() { registers.H=(byte)(registers.H&0xFE); }
+		void CB_8C() { registers.H=(byte)(registers.H&0xFD); }
+		void CB_94() { registers.H=(byte)(registers.H&0xFB); }
+		void CB_9C() { registers.H=(byte)(registers.H&0xF7); }
+		void CB_A4() { registers.H=(byte)(registers.H&0xEF); }
+		void CB_AC() { registers.H=(byte)(registers.H&0xDF); }
+		void CB_B4() { registers.H=(byte)(registers.H&0xBF); }
+		void CB_BC() { registers.H=(byte)(registers.H&0x7F); }
+
+		//res L
+		void CB_85() { registers.L=(byte)(registers.L&0xFE); }
+		void CB_8D() { registers.L=(byte)(registers.L&0xFD); }
+		void CB_95() { registers.L=(byte)(registers.L&0xFB); }
+		void CB_9D() { registers.L=(byte)(registers.L&0xF7); }
+		void CB_A5() { registers.L=(byte)(registers.L&0xEF); }
+		void CB_AD() { registers.L=(byte)(registers.L&0xDF); }
+		void CB_B5() { registers.L=(byte)(registers.L&0xBF); }
+		void CB_BD() { registers.L=(byte)(registers.L&0x7F); }
+
+		//res (HL)
+		void CB_86() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)&0xFE)); }
+		void CB_8E() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)&0xFD)); }
+		void CB_96() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)&0xFB)); }
+		void CB_9E() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)&0xF7)); }
+		void CB_A6() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)&0xEF)); }
+		void CB_AE() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)&0xDF)); }
+		void CB_B6() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)&0xBF)); }
+		void CB_BE() { mmu.Write(registers.HL,(byte)(mmu.Read(registers.HL)&0x7F)); }
 
 
 		#endregion
