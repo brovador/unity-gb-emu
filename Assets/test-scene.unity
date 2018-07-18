@@ -218,8 +218,8 @@ Camera:
   m_GameObject: {fileID: 544164235}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -287,6 +287,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44801cbb60c4349d6b6b5a418cec3227, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  attachedDebugger: {fileID: 0}
+  paused: 0
 --- !u!4 &1793931696
 Transform:
   m_ObjectHideFlags: 0
@@ -308,6 +310,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1793931694}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c782cac76182a47f2b21b985e3b16a53, type: 3}
+  m_Script: {fileID: 11500000, guid: 0fa3cb662ea7a43a1b04fec3a2a3e714, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  breakPoints:
+  - 0x0001
+  - 0x000C

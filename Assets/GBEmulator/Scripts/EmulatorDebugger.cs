@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace brovador.GBEmulator {
 
-	public class DebugTools : MonoBehaviour{
+	public class EmulatorDebugger : MonoBehaviour{
 
 		string[] opCodes = {
 			"NOP", "LD BC,d16", "LD (BC),A", "INC BC", "INC B", "DEC B", "LD B,d8", "RLCA", "LD (a16),SP", "ADD HL,BC", "LD A,(BC)", "DEC BC", "INC C", "DEC C", "LD C,d8", "RRCA",
@@ -69,11 +69,28 @@ namespace brovador.GBEmulator {
 		};
 
 		public Emulator emu { get; private set; }
+		public bool stop { get; private set; }
+		public string[] breakPoints;
+
+		Coroutine updateCoroutine;
 
 		void Awake()
 		{
 			emu = this.GetComponent<Emulator>();
+			emu.attachedDebugger = this;
 		}
+
+
+		public void OnEmulatorStepUpdate()
+		{
+			UInt16 addr = emu.cpu.registers.PC;
+			string saddr = string.Format("0x{0:X4}", addr);
+			List<string> breakPoints = new List<string>(this.breakPoints);
+			if (breakPoints.Contains(saddr)) {
+				emu.paused = true;
+			}
+		}
+
 
 		public string OperationNameAtAddress(UInt16 addr)
 		{
@@ -82,9 +99,9 @@ namespace brovador.GBEmulator {
 
 			if (op != 0xCB) {
 				int parameters = opCodeBytes[op];
-				if (parameters == 1) {
+				if (parameters == 2) {
 					code = string.Format("{0} 0x{1:X2}", code, emu.mmu.Read((UInt16)(addr + 1)));
-				} else if (parameters == 2) {
+				} else if (parameters == 3) {
 					code = string.Format("{0} 0x{1:X4}", code, emu.mmu.ReadW((UInt16)(addr + 1)));
 				}
 			} else {
@@ -93,11 +110,52 @@ namespace brovador.GBEmulator {
 			}
 			return code;
 		}
+
+		void OnGUI()
+		{
+			if (emu.isOn) {
+				GUILayout.BeginVertical();
+				GUILayout.Label(emu.paused ? string.Format("--- PAUSED AT: 0x{0:X4} ---", emu.cpu.registers.PC)  : "Running...");
+				GUILayout.Label(string.Format("AF: {0:X4}", emu.cpu.registers.AF)); 
+				GUILayout.Label(string.Format("BC: {0:X4}", emu.cpu.registers.BC)); 
+				GUILayout.Label(string.Format("DE: {0:X4}", emu.cpu.registers.DE)); 
+				GUILayout.Label(string.Format("HL: {0:X4}", emu.cpu.registers.HL)); 
+				GUILayout.Label(string.Format("Z: {0}, N: {1}, H:{2}, C:{3}", 
+					emu.cpu.registers.flagZ ? 1 : 0, emu.cpu.registers.flagN ? 1 : 0, 
+					emu.cpu.registers.flagH ? 1 : 0, emu.cpu.registers.flagC ? 1 : 0)); 
+				GUILayout.Space(5);
+				GUILayout.Label(string.Format("SP: {0:X4}", emu.cpu.registers.SP)); 
+				GUILayout.Label(string.Format("PC: {0:X4}", emu.cpu.registers.PC)); 
+				GUILayout.Space(5);
+				GUILayout.Label(string.Format("t: {0}", 
+					emu.cpu.timers.t));
+				GUILayout.Space(5);
+				GUILayout.Label(string.Format("stop: {0}, halt: {1}, ime: {2}", 
+					emu.cpu.stop ? 1 : 0, emu.cpu.halt ? 1 : 0, emu.cpu.ime ? 1 : 0));
+				GUILayout.Space(10);
+				GUILayout.Label(string.Format("{0:X4} | {1:X2} | {2}", 
+					emu.cpu.registers.PC, 
+					emu.mmu.Read(emu.cpu.registers.PC), 
+					OperationNameAtAddress(emu.cpu.registers.PC)));
+				GUILayout.EndVertical();
+
+
+				GUILayout.BeginArea(new Rect(Screen.width / 2.0f, 0.0f, Screen.width / 2.0f, Screen.height));
+				GUILayout.Label("Stack");
+				for (UInt16 i = 0xFFFD; i >= emu.cpu.registers.SP; i-=2) {
+					GUILayout.Label(string.Format("0x{0:X4} | 0x{1:X4}", i, emu.mmu.ReadW((UInt16)i)));
+				}
+				GUILayout.EndArea();
+			}
+		}
 	}
 
 	#if UNITY_EDITOR
-	[CustomEditor(typeof(DebugTools))]
+	[CustomEditor(typeof(EmulatorDebugger))]
 	public class EmulatorEditor : Editor {
+
+		string addrToCheck = "";
+		string resultAddr = "";
 
 		public override void OnInspectorGUI()
 		{
@@ -107,7 +165,7 @@ namespace brovador.GBEmulator {
 				return;
 
 			Color defaultColor = GUI.color;
-			DebugTools debugTools = (target as DebugTools);
+			EmulatorDebugger debugTools = (target as EmulatorDebugger);
 			Emulator emu = debugTools.emu;
 			if (!emu.isOn) {
 				GUI.color = Color.green;
@@ -130,33 +188,29 @@ namespace brovador.GBEmulator {
 			}
 
 
-			if (emu.isOn) {
+			if (emu.isOn && emu.paused) {
 				GUILayout.Space(30);
 				if (GUILayout.Button("Next step")) {
 					emu.EmulatorStep();
 				}
+				if (GUILayout.Button("Resume")) {
+					emu.paused = false;
+				}
 
-				GUILayout.Label(string.Format("AF: {0:X4}", emu.cpu.registers.AF)); 
-				GUILayout.Label(string.Format("BC: {0:X4}", emu.cpu.registers.BC)); 
-				GUILayout.Label(string.Format("DE: {0:X4}", emu.cpu.registers.DE)); 
-				GUILayout.Label(string.Format("HL: {0:X4}", emu.cpu.registers.HL)); 
-				GUILayout.Label(string.Format("Z: {0}, N: {1}, H:{2}, C:{3}", 
-					emu.cpu.registers.flagZ?1:0, emu.cpu.registers.flagN?1:0, 
-					emu.cpu.registers.flagH?1:0, emu.cpu.registers.flagC?1:0)); 
-				GUILayout.Space(5);
-				GUILayout.Label(string.Format("SP: {0:X4}", emu.cpu.registers.SP)); 
-				GUILayout.Label(string.Format("PC: {0:X4}", emu.cpu.registers.PC)); 
-				GUILayout.Space(5);
-				GUILayout.Label(string.Format("t: {0}, m: {1}", 
-					emu.cpu.timers.t, emu.cpu.timers.m));
-				GUILayout.Space(5);
-				GUILayout.Label(string.Format("stop: {0}, halt: {1}, ime: {2}", 
-					emu.cpu.stop?1:0, emu.cpu.halt?1:0, emu.cpu.ime?1:0));
-				GUILayout.Space(10);
-				GUILayout.Label(string.Format("{0:X4} | {1:X2} | {2}", 
-					emu.cpu.registers.PC, 
-					emu.mmu.Read(emu.cpu.registers.PC), 
-					debugTools.OperationNameAtAddress(emu.cpu.registers.PC)));
+				GUILayout.Space(30);
+				GUILayout.BeginHorizontal();
+				addrToCheck = GUILayout.TextField(addrToCheck);
+				if (GUILayout.Button("Check Address")) {
+					if (addrToCheck != string.Empty) {
+						UInt16 dir = (UInt16)(System.Convert.ToInt16(addrToCheck, 16));
+						resultAddr = string.Format("Value: 0x{0:X4}", emu.mmu.ReadW(dir));
+					}
+				}
+				GUILayout.EndHorizontal();
+
+				if (resultAddr != string.Empty) {
+					GUILayout.Label(resultAddr);
+				}
 			}
 		}
 	}

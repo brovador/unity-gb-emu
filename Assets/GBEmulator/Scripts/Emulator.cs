@@ -9,9 +9,13 @@ using UnityEditor;
 namespace brovador.GBEmulator {
 
 	public class Emulator : MonoBehaviour {
-		
+
+		public const float FPS = 59.7f;
+		public EmulatorDebugger attachedDebugger;
+
 		Coroutine emulatorStepCoroutine;
 		public bool isOn { get; private set; }
+		public bool paused = false;
 
 		[HideInInspector] public CPU cpu;
 		[HideInInspector] public MMU mmu;
@@ -28,7 +32,7 @@ namespace brovador.GBEmulator {
 		{
 			if (isOn) return;
 			Init();
-			//StartEmulatorCoroutine();
+			StartEmulatorCoroutine();
 			isOn = true;
 		}
 
@@ -75,8 +79,18 @@ namespace brovador.GBEmulator {
 
 		IEnumerator EmulatorCoroutine()
 		{
+			var cyclesPerSecond = cpu.clockSpeed / FPS;
 			while (true) {
-				EmulatorStep();
+				var fTime = cpu.timers.t + cyclesPerSecond;
+				while (cpu.timers.t < fTime) {
+					while (paused) {
+						yield return null;
+					}
+					EmulatorStep();
+					if (attachedDebugger != null) {
+						attachedDebugger.OnEmulatorStepUpdate();
+					}
+				}
 				yield return null;
 			}
 		}
