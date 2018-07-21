@@ -142,8 +142,13 @@ namespace brovador.GBEmulator {
 
 				GUILayout.BeginArea(new Rect(Screen.width / 2.0f, 0.0f, Screen.width / 2.0f, Screen.height));
 				GUILayout.Label("Stack");
+				int maxLines = 5;
 				for (UInt16 i = 0xFFFD; i >= emu.cpu.registers.SP; i-=2) {
 					GUILayout.Label(string.Format("0x{0:X4} | 0x{1:X4}", i, emu.mmu.ReadW((UInt16)i)));
+					if (maxLines-- == 0) {
+						GUILayout.Label("...");
+						break;
+					}
 				}
 				GUILayout.EndArea();
 			}
