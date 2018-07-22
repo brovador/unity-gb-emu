@@ -138,12 +138,15 @@ namespace brovador.GBEmulator {
 		}
 
 
+		public float LastFrameTime { get; private set; }
 		IEnumerator EmulatorCoroutine()
 		{
+			#warning Why I need to multiply this???
 			var cyclesPerSecond = cpu.clockSpeed / FPS;
 
 			while (true) {
 				var fTime = cpu.timers.t + cyclesPerSecond;
+				var fStart = Time.realtimeSinceStartup;
 				while (cpu.timers.t < fTime) {
 					if (attachedDebugger != null) {
 						attachedDebugger.OnEmulatorStepUpdate();
@@ -154,6 +157,7 @@ namespace brovador.GBEmulator {
 					EmulatorStep();
 				}
 				yield return null;
+				LastFrameTime = Time.realtimeSinceStartup - fStart;
 			}
 		}
 

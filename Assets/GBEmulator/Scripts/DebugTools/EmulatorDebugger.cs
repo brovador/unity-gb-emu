@@ -70,6 +70,8 @@ namespace brovador.GBEmulator {
 
 		public Emulator emu { get; private set; }
 		public bool stop { get; private set; }
+
+		public bool enableBreakPoints = true;
 		public string[] breakPoints;
 
 		Coroutine updateCoroutine;
@@ -83,11 +85,14 @@ namespace brovador.GBEmulator {
 
 		public void OnEmulatorStepUpdate()
 		{
-			UInt16 addr = emu.cpu.registers.PC;
-			string saddr = string.Format("0x{0:X4}", addr);
-			List<string> breakPoints = new List<string>(this.breakPoints);
-			if (breakPoints.Contains(saddr)) {
-				emu.paused = true;
+			if (enableBreakPoints) {
+				string saddr = string.Format("0x{0:X4}", emu.cpu.registers.PC);
+				for (int i = 0; i < breakPoints.Length; i++) {
+					if (breakPoints[i] == saddr) {
+						emu.paused = true;
+						break;
+					}
+				}
 			}
 		}
 
@@ -144,6 +149,7 @@ namespace brovador.GBEmulator {
 
 
 				GUILayout.BeginArea(new Rect(Screen.width / 2.0f, 0.0f, Screen.width / 2.0f, Screen.height));
+				GUILayout.Label(string.Format("FPS: {0:0.00}", 1.0f / emu.LastFrameTime));
 				GUILayout.Label("Stack");
 				int maxLines = 5;
 				for (UInt16 i = 0xFFFD; i >= emu.cpu.registers.SP; i-=2) {
@@ -154,6 +160,8 @@ namespace brovador.GBEmulator {
 					}
 				}
 				GUILayout.EndArea();
+			} else if (GUILayout.Button("Start emulation")) {
+				emu.TurnOn();
 			}
 		}
 	}
