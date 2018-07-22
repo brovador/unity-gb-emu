@@ -72,7 +72,7 @@ namespace brovador.GBEmulator {
 		public void EmulatorStep()
 		{
 			cpu.Step();
-
+			gpu.Step();
 		}
 
 

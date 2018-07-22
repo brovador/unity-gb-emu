@@ -222,8 +222,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44801cbb60c4349d6b6b5a418cec3227, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skipBios: 1
-  rom: {fileID: 4900000, guid: 49d0ceea3110646d2b857c1ae83b60d9, type: 3}
+  skipBios: 0
+  rom: {fileID: 4900000, guid: 2f9317ee95bb8466084bc123e43f478f, type: 3}
   paused: 0
   attachedDebugger: {fileID: 0}
 --- !u!4 &1793931696
@@ -251,4 +251,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   breakPoints:
-  - 0x0101
+  - 0x0064

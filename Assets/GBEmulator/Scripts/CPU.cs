@@ -21,6 +21,7 @@ namespace brovador.GBEmulator {
 
 		public struct Timers {
 			public uint t;
+			public uint lastOpCycles;
 //			public uint m;
 		}
 
@@ -158,7 +159,31 @@ namespace brovador.GBEmulator {
 		{
 			var op = mmu.Read(registers.PC++);
 			operations[op]();
-			timers.t += opcodeCycles[op];
+			timers.lastOpCycles = opcodeCycles[op];
+			timers.t += timers.lastOpCycles;
+
+//			if (ime && mmu.HasInterrupts) {
+//				ime = false;
+//				halt = false;
+//				if (mmu.CheckInterrupt(MMU.InterruptType.VBlank)) {
+//					mmu.ClearInterrupt(MMU.InterruptType.VBlank);
+//					RST_40();
+//				} else if (mmu.CheckInterrupt(MMU.InterruptType.LCDCStatus)) {
+//					mmu.ClearInterrupt(MMU.InterruptType.LCDCStatus);
+//					RST_48();
+//				} else if (mmu.CheckInterrupt(MMU.InterruptType.TimerOverflow)) {
+//					mmu.ClearInterrupt(MMU.InterruptType.TimerOverflow);
+//					RST_50();
+//				} else if (mmu.CheckInterrupt(MMU.InterruptType.SerialTransferCompletion)) {
+//					mmu.ClearInterrupt(MMU.InterruptType.SerialTransferCompletion);
+//					RST_58();
+//				} else if (mmu.CheckInterrupt(MMU.InterruptType.HighToLowP10P13)) {
+//					mmu.ClearInterrupt(MMU.InterruptType.HighToLowP10P13);
+//					RST_60();
+//				} else {
+//					ime = true;
+//				}
+//			}
 		}
 
 
@@ -581,6 +606,12 @@ namespace brovador.GBEmulator {
 		void OP_EF() { registers.SP -= 2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x28; } //RST 28H
 		void OP_F7() { registers.SP -= 2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x30; } //RST 30H
 		void OP_FF() { registers.SP -= 2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x38; } //RST 38H
+
+		void RST_40() { registers.SP -= 2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x40; }
+		void RST_48() { registers.SP -= 2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x48; }
+		void RST_50() { registers.SP -= 2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x50; }
+		void RST_58() { registers.SP -= 2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x58; }
+		void RST_60() { registers.SP -= 2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x60; }
 
 		//ret
 		void OP_C9() { registers.PC=mmu.ReadW(registers.SP); registers.SP+=2; }

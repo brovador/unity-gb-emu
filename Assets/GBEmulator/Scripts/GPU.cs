@@ -16,11 +16,15 @@ namespace brovador.GBEmulator {
 		CPU cpu;
 		MMU mmu;
 
+		#warning this should be in memory
 		GPUMode gpuMode;
-		int line;
+
+		byte CurrentLine {
+			get { return mmu.Read(0xFF44); }
+			set { mmu.Write(0xFF44, (byte)value); }
+		}
 
 		uint clock;
-		uint lastCPUclock;
 
 		public int HORIZONAL_BLANK_CYCLES = 204;
 		public int VERTICAL_BLANK_CYCLES = 4560;
@@ -35,42 +39,41 @@ namespace brovador.GBEmulator {
 			this.mmu = mmu;
 
 			gpuMode = GPUMode.HBlank;
-			line = 0;
+			CurrentLine = 0;
 			clock = 0;
-			lastCPUclock = cpu.timers.t;
 		}
 
 
 		public void Step()
 		{
-			clock += (cpu.timers.t - lastCPUclock);
-			lastCPUclock = cpu.timers.t;
+			clock += cpu.timers.lastOpCycles;
 
 			switch (gpuMode) {
 
 			//HBlank
 			case GPUMode.HBlank:
 				if (clock >= HORIZONAL_BLANK_CYCLES) {
-					clock = 0;
-					line++;
+					clock -= (uint)HORIZONAL_BLANK_CYCLES;
+					CurrentLine++;
 
-					if (line == MAX_LINES) {
+					if (CurrentLine == MAX_LINES) {
 						gpuMode = GPUMode.VBlank;
-						//TODO: update graphics
+						mmu.SetInterrupt(MMU.InterruptType.VBlank);
+						DrawFrame();
 					}
 				}
 				break;
 			
 			//VBlank
 			case GPUMode.VBlank:
-				if (clock >= (SCANLINE_OAM_CYCLES + SCANLINE_VRAM_CYCLES + HORIZONAL_BLANK_CYCLES)) {
-					clock = 0;
-					line++;
+				uint t = (uint)(SCANLINE_OAM_CYCLES + SCANLINE_VRAM_CYCLES + HORIZONAL_BLANK_CYCLES);
+				if (clock >= t) {
+					clock -= t;
+					CurrentLine++;
 
-					if (line > 153) {
+					if (CurrentLine > 153) {
 						gpuMode = GPUMode.OAMRead;
-						line = 0;
-						mmu.SetInterrupt(MMU.InterruptType.VBlank);
+						CurrentLine = 0;
 					}
 				}
 				break;
@@ -78,7 +81,7 @@ namespace brovador.GBEmulator {
 			//OAM Read
 			case GPUMode.OAMRead:
 				if (clock >= SCANLINE_OAM_CYCLES) {
-					clock = 0;
+					clock -= (uint)SCANLINE_OAM_CYCLES;
 					gpuMode = GPUMode.VRAMRead;
 				}
 				break;
@@ -86,11 +89,18 @@ namespace brovador.GBEmulator {
 			//VRAM Read
 			case GPUMode.VRAMRead:
 				if (clock >= SCANLINE_VRAM_CYCLES) {
-					clock = 0;
+					clock -= (uint)SCANLINE_VRAM_CYCLES;
 					gpuMode = GPUMode.HBlank;
 				}
 				break;
 			}
+		}
+
+
+		public void DrawFrame()
+		{
+//			Debug.Log(string.Format("Frame ellapsed time: {0}", (Time.realtimeSinceStartup - t)));
+//			t = Time.realtimeSinceStartup;
 		}
 	}
 }
