@@ -132,6 +132,9 @@ namespace brovador.GBEmulator {
 				GUILayout.Space(5);
 				GUILayout.Label(string.Format("stop: {0}, halt: {1}, ime: {2}", 
 					emu.cpu.stop ? 1 : 0, emu.cpu.halt ? 1 : 0, emu.cpu.ime ? 1 : 0));
+				GUILayout.Label(string.Format("ie: {0}, if: {1}", 
+					emu.mmu.Read(0xFFFF),
+					emu.mmu.Read(0xFF0F)));
 				GUILayout.Space(10);
 				GUILayout.Label(string.Format("{0:X4} | {1:X2} | {2}", 
 					emu.cpu.registers.PC, 
