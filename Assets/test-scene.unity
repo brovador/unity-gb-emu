@@ -250,5 +250,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fa3cb662ea7a43a1b04fec3a2a3e714, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enableBreakPoints: 1
   breakPoints:
-  - 0x0100
+  - 0xC834

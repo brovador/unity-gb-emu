@@ -86,7 +86,7 @@ namespace brovador.GBEmulator {
 		public void OnEmulatorStepUpdate()
 		{
 			if (enableBreakPoints) {
-				string saddr = string.Format("0x{0:X4}", emu.cpu.registers.PC);
+				string saddr = string.Format("0x{0:X4}", emu.cpu.registers.PC); 
 				for (int i = 0; i < breakPoints.Length; i++) {
 					if (breakPoints[i] == saddr) {
 						emu.paused = true;
@@ -119,47 +119,47 @@ namespace brovador.GBEmulator {
 		void OnGUI()
 		{
 			if (emu.isOn) {
-				GUILayout.BeginVertical();
-				GUILayout.Label(emu.paused ? string.Format("--- PAUSED AT: 0x{0:X4} ---", emu.cpu.registers.PC)  : "Running...");
-				GUILayout.Label(string.Format("AF: {0:X4}", emu.cpu.registers.AF)); 
-				GUILayout.Label(string.Format("BC: {0:X4}", emu.cpu.registers.BC)); 
-				GUILayout.Label(string.Format("DE: {0:X4}", emu.cpu.registers.DE)); 
-				GUILayout.Label(string.Format("HL: {0:X4}", emu.cpu.registers.HL)); 
-				GUILayout.Label(string.Format("Z: {0}, N: {1}, H:{2}, C:{3}", 
-					emu.cpu.registers.flagZ ? 1 : 0, emu.cpu.registers.flagN ? 1 : 0, 
-					emu.cpu.registers.flagH ? 1 : 0, emu.cpu.registers.flagC ? 1 : 0)); 
-				GUILayout.Space(5);
-				GUILayout.Label(string.Format("SP: {0:X4}", emu.cpu.registers.SP)); 
-				GUILayout.Label(string.Format("PC: {0:X4}", emu.cpu.registers.PC)); 
-				GUILayout.Space(5);
-				GUILayout.Label(string.Format("t: {0}", 
-					emu.cpu.timers.t));
-				GUILayout.Space(5);
-				GUILayout.Label(string.Format("stop: {0}, halt: {1}, ime: {2}", 
-					emu.cpu.stop ? 1 : 0, emu.cpu.halt ? 1 : 0, emu.cpu.ime ? 1 : 0));
-				GUILayout.Label(string.Format("ie: {0}, if: {1}", 
-					emu.mmu.Read(0xFFFF),
-					emu.mmu.Read(0xFF0F)));
+
+				if (emu.paused) {
+					GUI.color = Color.white;
+				} else {
+					GUI.color = Color.green;
+				}
+
+				GUILayout.Label(string.Format("FPS: {0:0.00}", 1.0f / emu.LastFrameTime));
 				GUILayout.Space(10);
-				GUILayout.Label(string.Format("{0:X4} | {1:X2} | {2}", 
+				GUILayout.Label(string.Format("OP: {0:X4} | {1:X2} | {2}", 
 					emu.cpu.registers.PC, 
 					emu.mmu.Read(emu.cpu.registers.PC), 
 					OperationNameAtAddress(emu.cpu.registers.PC)));
+				GUILayout.Space(10);
+				GUILayout.BeginHorizontal();
+				GUILayout.BeginVertical();
+				GUILayout.Label(string.Format("AF:  {0:X4}", emu.cpu.registers.AF)); 
+				GUILayout.Label(string.Format("BC:  {0:X4}", emu.cpu.registers.BC)); 
+				GUILayout.Label(string.Format("DE:  {0:X4}", emu.cpu.registers.DE)); 
+				GUILayout.Label(string.Format("HL:  {0:X4}", emu.cpu.registers.HL)); 
+				GUILayout.Label(string.Format("SP:  {0:X4}", emu.cpu.registers.SP)); 
+				GUILayout.Label(string.Format("PC:  {0:X4}", emu.cpu.registers.PC)); 
+				GUILayout.Label(string.Format("ime: {0}", emu.cpu.ime)); 
+				GUILayout.Label(string.Format("ima: {0}", "??")); 
+				GUILayout.Label(string.Format("Z: {0}, N: {1}, H:{2}, C:{3}", 
+					emu.cpu.registers.flagZ ? 1 : 0, emu.cpu.registers.flagN ? 1 : 0, 
+					emu.cpu.registers.flagH ? 1 : 0, emu.cpu.registers.flagC ? 1 : 0)); 
 				GUILayout.EndVertical();
 
+				GUILayout.BeginVertical();
+				GUILayout.Label(string.Format("lcd: {0}", "??")); 
+				GUILayout.Label(string.Format("stat:{0}", "??")); 
+				GUILayout.Label(string.Format("ly:  {0}", "??"));
+				GUILayout.Label(string.Format("cnt: {0}", "??"));
+				GUILayout.Label(string.Format("IE:  {0:X2}", emu.mmu.Read(0xFFFF))); 
+				GUILayout.Label(string.Format("IF:  {0:X2}", emu.mmu.Read(0xFF0F))); 
+				GUILayout.Label(string.Format("spd: {0}", "??"));
+				GUILayout.Label(string.Format("rom: {0}", "??"));
+				GUILayout.EndVertical();
+				GUILayout.EndHorizontal();
 
-				GUILayout.BeginArea(new Rect(Screen.width / 2.0f, 0.0f, Screen.width / 2.0f, Screen.height));
-				GUILayout.Label(string.Format("FPS: {0:0.00}", 1.0f / emu.LastFrameTime));
-				GUILayout.Label("Stack");
-				int maxLines = 5;
-				for (UInt16 i = 0xFFFD; i >= emu.cpu.registers.SP; i-=2) {
-					GUILayout.Label(string.Format("0x{0:X4} | 0x{1:X4}", i, emu.mmu.ReadW((UInt16)i)));
-					if (maxLines-- == 0) {
-						GUILayout.Label("...");
-						break;
-					}
-				}
-				GUILayout.EndArea();
 			} else if (GUILayout.Button("Start emulation")) {
 				emu.TurnOn();
 			}

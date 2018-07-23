@@ -163,7 +163,7 @@ namespace brovador.GBEmulator {
 			timers.lastOpCycles = opcodeCycles[op];
 			timers.t += timers.lastOpCycles;
 
-//			if (ime && mmu.HasInterrupts) {
+//			if (ime && mmu.HasInterrupts()) {
 //				ime = false;
 //				halt = false;
 //				if (mmu.CheckInterrupt(MMU.InterruptType.VBlank)) {
@@ -273,7 +273,7 @@ namespace brovador.GBEmulator {
 		void OP_02() { mmu.WriteW(registers.BC, registers.A); } //LD (BC) A
 		void OP_12() { mmu.WriteW(registers.DE, registers.A); } //LD (DE) A
 		void OP_77() { mmu.WriteW(registers.HL, registers.A); } //LD (HL) A
-		void OP_EA() { mmu.WriteW(registers.PC, registers.A); registers.PC+=2; } //LD (nn) A
+		void OP_EA() { mmu.WriteW(mmu.ReadW(registers.PC), registers.A); registers.PC+=2; } //LD (nn) A
 
 		//ld-a-(c)
 		void OP_F2() { registers.A=mmu.Read((UInt16)(0xFF00 + registers.C)); } //LD A,($FF00+C)

@@ -84,10 +84,7 @@ namespace brovador.GBEmulator {
 			cpu.registers.HL = 0x014D;
 			cpu.registers.SP = 0xFFFE;
 			cpu.registers.PC = 0x0100;
-
-			//Mark as bios read
-			mmu.Write((UInt16)0xFF50, (byte)0x01);
-
+			
 			//Set default register values
 			mmu.Write((UInt16)0xFF05, (byte)0x00);
 			mmu.Write((UInt16)0xFF06, (byte)0x00);
