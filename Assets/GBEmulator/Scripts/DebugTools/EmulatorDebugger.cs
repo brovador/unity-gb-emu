@@ -82,9 +82,16 @@ namespace brovador.GBEmulator {
 			emu.attachedDebugger = this;
 		}
 
+		System.IO.StreamWriter writer;
 
 		public void OnEmulatorStepUpdate()
 		{
+//			if (writer == null) {
+//				writer = System.IO.File.CreateText("./log.txt");
+//			}
+//
+//			writer.WriteLine(string.Format("PC: {0}, INSTR: {1}", emu.cpu.registers.PC, OperationNameAtAddress(emu.cpu.registers.PC)));
+
 			if (enableBreakPoints) {
 				string saddr = string.Format("0x{0:X4}", emu.cpu.registers.PC); 
 				for (int i = 0; i < breakPoints.Length; i++) {

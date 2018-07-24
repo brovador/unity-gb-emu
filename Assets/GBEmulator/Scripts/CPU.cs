@@ -155,7 +155,6 @@ namespace brovador.GBEmulator {
 			};
 		}
 
-
 		public void Step()
 		{
 			var op = mmu.Read(registers.PC++);
@@ -548,7 +547,7 @@ namespace brovador.GBEmulator {
 		//rra
 		void OP_1F() {
 			bool flagC = registers.flagC;
-			registers.flagC = ((registers.A << 7) != 0); 
+			registers.flagC = ((registers.A&0x01) != 0); 
 			registers.A = (byte)((registers.A >> 1) | (flagC?0x80:0x00));
 			registers.flagZ = (registers.A == 0); 
 			registers.flagH = false; 
@@ -682,14 +681,14 @@ namespace brovador.GBEmulator {
 
 
 		//rr
-		void CB_1F() { bool flagC=registers.flagC; registers.flagC=((registers.A<<7)!=0);  registers.A=(byte)((registers.A>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.A==0);  registers.flagH=false;  registers.flagN=false; }
-		void CB_18() { bool flagC=registers.flagC; registers.flagC=((registers.B<<7)!=0);  registers.B=(byte)((registers.B>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.B==0);  registers.flagH=false;  registers.flagN=false; }
-		void CB_19() { bool flagC=registers.flagC; registers.flagC=((registers.C<<7)!=0);  registers.C=(byte)((registers.C>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.C==0);  registers.flagH=false;  registers.flagN=false; }
-		void CB_1A() { bool flagC=registers.flagC; registers.flagC=((registers.D<<7)!=0);  registers.D=(byte)((registers.D>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.D==0);  registers.flagH=false;  registers.flagN=false; }
-		void CB_1B() { bool flagC=registers.flagC; registers.flagC=((registers.E<<7)!=0);  registers.E=(byte)((registers.E>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.E==0);  registers.flagH=false;  registers.flagN=false; }
-		void CB_1C() { bool flagC=registers.flagC; registers.flagC=((registers.H<<7)!=0);  registers.H=(byte)((registers.H>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.H==0);  registers.flagH=false;  registers.flagN=false; }
-		void CB_1D() { bool flagC=registers.flagC; registers.flagC=((registers.L<<7)!=0);  registers.L=(byte)((registers.L>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.L==0);  registers.flagH=false;  registers.flagN=false; }
-		void CB_1E() { bool flagC=registers.flagC; registers.flagC=((mmu.Read(registers.HL)<<7)!=0);  mmu.Write(registers.HL,(byte)((mmu.Read(registers.HL)>>1)|(flagC?0x80:0x00))); registers.flagZ=(mmu.Read(registers.HL)==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_1F() { bool flagC=registers.flagC; registers.flagC=((registers.A&0x01)!=0);  registers.A=(byte)((registers.A>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.A==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_18() { bool flagC=registers.flagC; registers.flagC=((registers.B&0x01)!=0);  registers.B=(byte)((registers.B>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.B==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_19() { bool flagC=registers.flagC; registers.flagC=((registers.C&0x01)!=0);  registers.C=(byte)((registers.C>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.C==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_1A() { bool flagC=registers.flagC; registers.flagC=((registers.D&0x01)!=0);  registers.D=(byte)((registers.D>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.D==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_1B() { bool flagC=registers.flagC; registers.flagC=((registers.E&0x01)!=0);  registers.E=(byte)((registers.E>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.E==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_1C() { bool flagC=registers.flagC; registers.flagC=((registers.H&0x01)!=0);  registers.H=(byte)((registers.H>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.H==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_1D() { bool flagC=registers.flagC; registers.flagC=((registers.L&0x01)!=0);  registers.L=(byte)((registers.L>>1)|(flagC?0x80:0x00)); registers.flagZ=(registers.L==0);  registers.flagH=false;  registers.flagN=false; }
+		void CB_1E() { bool flagC=registers.flagC; registers.flagC=((mmu.Read(registers.HL)&0x01)!=0);  mmu.Write(registers.HL,(byte)((mmu.Read(registers.HL)>>1)|(flagC?0x80:0x00))); registers.flagZ=(mmu.Read(registers.HL)==0);  registers.flagH=false;  registers.flagN=false; }
 
 		//sla
 		void CB_27() { registers.flagC=((registers.A & 0x80)!=0);  registers.A=(byte)(registers.A<<1);  registers.flagZ=(registers.A==0);  registers.flagH=false;  registers.flagN=false; }
