@@ -10,6 +10,10 @@ namespace brovador.GBEmulator {
 
 	public class Emulator : MonoBehaviour {
 
+		public event System.Action<Emulator> OnEmulatorOn;
+		public event System.Action<Emulator> OnEmulatorOff;
+		public event System.Action<Emulator> OnEmulatorStep;
+
 		public const float FPS = 59.7f;
 		public bool skipBios;
 		public TextAsset rom;
@@ -18,7 +22,6 @@ namespace brovador.GBEmulator {
 		public bool isOn { get; private set; }
 
 		[HideInInspector] public bool paused = false;
-		[HideInInspector] public EmulatorDebugger attachedDebugger;
 		[HideInInspector] public CPU cpu;
 		[HideInInspector] public MMU mmu;
 		[HideInInspector] public GPU gpu;
@@ -47,6 +50,10 @@ namespace brovador.GBEmulator {
 
 			StartEmulatorCoroutine();
 			isOn = true;
+
+			if (OnEmulatorOn != null) {
+				OnEmulatorOn(this);
+			}
 		}
 
 
@@ -55,6 +62,10 @@ namespace brovador.GBEmulator {
 			if (!isOn) return;
 			StopEmulatorCoroutine();
 			isOn = false;
+
+			if (OnEmulatorOff != null) {
+				OnEmulatorOff(this);
+			}
 		}
 
 
@@ -145,8 +156,8 @@ namespace brovador.GBEmulator {
 				var fTime = cpu.timers.t + cyclesPerSecond;
 				var fStart = Time.realtimeSinceStartup;
 				while (cpu.timers.t < fTime) {
-					if (attachedDebugger != null) {
-						attachedDebugger.OnEmulatorStepUpdate();
+					if (OnEmulatorStep != null) {
+						OnEmulatorStep(this);
 					}
 					while (paused) {
 						yield return null;

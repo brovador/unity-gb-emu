@@ -248,13 +248,13 @@ namespace brovador.GBEmulator {
 		void OP_6C() { registers.L=registers.H; } //LD L H
 		void OP_6D() { registers.L=registers.L; } //LD L L
 		void OP_6E() { registers.L=mmu.Read(registers.HL); } //LD L (HL)
-		void OP_70() { mmu.WriteW(registers.HL, registers.B); } //LD (HL) B
-		void OP_71() { mmu.WriteW(registers.HL, registers.C); } //LD (HL) C
-		void OP_72() { mmu.WriteW(registers.HL, registers.D); } //LD (HL) D
-		void OP_73() { mmu.WriteW(registers.HL, registers.E); } //LD (HL) E
-		void OP_74() { mmu.WriteW(registers.HL, registers.H); } //LD (HL) H
-		void OP_75() { mmu.WriteW(registers.HL, registers.L); } //LD (HL) L
-		void OP_36() { mmu.WriteW(registers.HL, mmu.Read(registers.PC++)); } //LD (HL) n
+		void OP_70() { mmu.Write(registers.HL, registers.B); } //LD (HL) B
+		void OP_71() { mmu.Write(registers.HL, registers.C); } //LD (HL) C
+		void OP_72() { mmu.Write(registers.HL, registers.D); } //LD (HL) D
+		void OP_73() { mmu.Write(registers.HL, registers.E); } //LD (HL) E
+		void OP_74() { mmu.Write(registers.HL, registers.H); } //LD (HL) H
+		void OP_75() { mmu.Write(registers.HL, registers.L); } //LD (HL) L
+		void OP_36() { mmu.Write(registers.HL, mmu.Read(registers.PC++)); } //LD (HL) n
 
 		//ld-a-n
 		void OP_0A() { registers.A=mmu.Read(registers.BC); } //LD A (BC)
@@ -269,10 +269,10 @@ namespace brovador.GBEmulator {
 		void OP_5F() { registers.E=registers.A; } //LD E A
 		void OP_67() { registers.H=registers.A; } //LD H A
 		void OP_6F() { registers.L=registers.A; } //LD L A
-		void OP_02() { mmu.WriteW(registers.BC, registers.A); } //LD (BC) A
-		void OP_12() { mmu.WriteW(registers.DE, registers.A); } //LD (DE) A
-		void OP_77() { mmu.WriteW(registers.HL, registers.A); } //LD (HL) A
-		void OP_EA() { mmu.WriteW(mmu.ReadW(registers.PC), registers.A); registers.PC+=2; } //LD (nn) A
+		void OP_02() { mmu.Write(registers.BC, registers.A); } //LD (BC) A
+		void OP_12() { mmu.Write(registers.DE, registers.A); } //LD (DE) A
+		void OP_77() { mmu.Write(registers.HL, registers.A); } //LD (HL) A
+		void OP_EA() { mmu.Write(mmu.ReadW(registers.PC), registers.A); registers.PC+=2; } //LD (nn) A
 
 		//ld-a-(c)
 		void OP_F2() { registers.A=mmu.Read((UInt16)(0xFF00 + registers.C)); } //LD A,($FF00+C)

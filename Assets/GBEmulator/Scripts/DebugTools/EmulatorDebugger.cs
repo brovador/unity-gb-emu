@@ -71,20 +71,62 @@ namespace brovador.GBEmulator {
 		public Emulator emu { get; private set; }
 		public bool stop { get; private set; }
 
+		[Header("Breakpoints")]
 		public bool enableBreakPoints = true;
 		public string[] breakPoints;
+		public string[] memoryBreakPoints;
 
 		Coroutine updateCoroutine;
 
 		void Awake()
 		{
 			emu = this.GetComponent<Emulator>();
-			emu.attachedDebugger = this;
+			emu.OnEmulatorOn += Emu_OnEmulatorOn;
+			emu.OnEmulatorOff += Emu_OnEmulatorOff;
+			emu.OnEmulatorStep += OnEmulatorStepUpdate;
 		}
 
-		System.IO.StreamWriter writer;
 
-		public void OnEmulatorStepUpdate()
+		void OnDestroy()
+		{
+			emu.OnEmulatorOn -= Emu_OnEmulatorOn;
+			emu.OnEmulatorOff -= Emu_OnEmulatorOff;
+			emu.OnEmulatorStep -= OnEmulatorStepUpdate;
+		}
+
+
+		#region Emulator events
+
+		void Emu_OnEmulatorOff (Emulator obj)
+		{
+			emu.mmu.OnMemoryAccess -= MMUOnMemoryAccess;
+		}
+
+
+		void Emu_OnEmulatorOn (Emulator obj)
+		{
+			emu.mmu.OnMemoryAccess += MMUOnMemoryAccess;
+		}
+
+
+		void MMUOnMemoryAccess (MMU mmu, ushort addr, bool isWrite)
+		{
+			if (enableBreakPoints && isWrite) {
+				string saddr = string.Format("0x{0:X4}", addr);
+				for (int i = 0; i < memoryBreakPoints.Length; i++) {
+					if (memoryBreakPoints[i] == saddr) {
+						Debug.Log(string.Format("<color=blue>PAUSED on memory access: {0:X4}</color>", addr));
+						emu.paused = true;
+						break;
+					}
+				}
+			}
+		}
+
+
+//		System.IO.StreamWriter writer;
+
+		public void OnEmulatorStepUpdate(Emulator emu)
 		{
 //			if (writer == null) {
 //				writer = System.IO.File.CreateText("./log.txt");
@@ -102,6 +144,8 @@ namespace brovador.GBEmulator {
 				}
 			}
 		}
+
+		#endregion
 
 
 		public string OperationNameAtAddress(UInt16 addr)
@@ -226,7 +270,7 @@ namespace brovador.GBEmulator {
 				if (GUILayout.Button("Check Address")) {
 					if (addrToCheck != string.Empty) {
 						UInt16 dir = (UInt16)(System.Convert.ToInt16(addrToCheck, 16));
-						resultAddr = string.Format("Value: 0x{0:X4}", emu.mmu.ReadW(dir));
+						resultAddr = string.Format("Value: 0x{0:X2}", emu.mmu.Read(dir));
 					}
 				}
 				GUILayout.EndHorizontal();
