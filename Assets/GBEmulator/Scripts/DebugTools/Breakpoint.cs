@@ -25,13 +25,13 @@ namespace brovador.GBEmulator.Debugger {
 		public string conditionValue;
 
 
-		public bool IsActivated(Emulator emu) {
+		public bool IsActivated(ushort addr, Emulator emu) {
 			var result = this.active;
 			if (!result)
 				return false;
 
 			ushort addressValue = System.Convert.ToUInt16(address, 16);
-			result = result && emu.cpu.registers.PC == addressValue;
+			result = result && addr == addressValue;
 			if (result && condition != Condition.None && conditionValue != string.Empty) {
 					ushort value = System.Convert.ToUInt16(conditionValue, 16);
 				ushort value2 = 0;
@@ -55,7 +55,7 @@ namespace brovador.GBEmulator.Debugger {
 					value2 = emu.cpu.registers.SP;
 					break;
 				case Condition.AddressValue:
-					value2 = emu.mmu.ReadW(addressValue);
+					value2 = emu.mmu.Read(addressValue);
 					break;
 				}
 				result = result && value == value2;

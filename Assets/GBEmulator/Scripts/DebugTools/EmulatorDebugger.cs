@@ -133,7 +133,7 @@ namespace brovador.GBEmulator.Debugger {
 		{
 			if (enableBreakPoints && isWrite) {
 				for (int i = 0; i < memoryBreakPoints.Count; i++) {
-					if (memoryBreakPoints[i].IsActivated(emu)) {
+					if (memoryBreakPoints[i].IsActivated(addr, emu)) {
 						Debug.Log(string.Format("<color=blue>PAUSED on memory access: {0:X4}</color>", addr));
 						emu.paused = true;
 						break;
@@ -156,7 +156,7 @@ namespace brovador.GBEmulator.Debugger {
 
 			if (enableBreakPoints) {
 				for (int i = 0; i < breakPoints.Count; i++) {
-					if (breakPoints[i].IsActivated(emu)) {
+					if (breakPoints[i].IsActivated(emu.cpu.registers.PC, emu)) {
 						emu.paused = true;
 						break;
 					}
