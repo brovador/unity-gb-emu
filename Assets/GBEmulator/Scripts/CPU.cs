@@ -461,8 +461,7 @@ namespace brovador.GBEmulator {
 		void OP_09() { UInt16 hl=registers.HL; registers.HL+=registers.BC; registers.flagN=false; registers.flagH=CheckHFlag(hl, registers.BC, is16bit:true); registers.flagC=(hl>registers.HL); } //ADD HL BC
 		void OP_19() { UInt16 hl=registers.HL; registers.HL+=registers.DE; registers.flagN=false; registers.flagH=CheckHFlag(hl, registers.DE, is16bit:true); registers.flagC=(hl>registers.HL); } //ADD HL DE
 		void OP_29() { UInt16 hl=registers.HL; registers.HL+=registers.HL; registers.flagN=false; registers.flagH=CheckHFlag(hl, registers.HL, is16bit:true); registers.flagC=(hl>registers.HL); } //ADD HL HL
-		void OP_39() { UInt16 hl=registers.HL; registers.HL+=registers.SP; registers.flagN=false; registers.flagH=CheckHFlag(hl, registers.SP, is16bit:true); registers.flagC=(hl>registers.HL); 
-		} //ADD HL SP
+		void OP_39() { UInt16 hl=registers.HL; registers.HL+=registers.SP; registers.flagN=false; registers.flagH=CheckHFlag(hl, registers.SP, is16bit:true); registers.flagC=(hl>registers.HL); } //ADD HL SP
 
 		//add-sp-n
 		#warning set flags carry and half-carry? (jsGB doesn't do it)
