@@ -332,17 +332,6 @@ namespace brovador.GBEmulator {
 				
 			registers.flagZ=false; 
 			registers.flagN=false; 
-
-
-//			UInt16 sp=registers.SP;
-//			int m = DecodeSigned(mmu.Read(registers.PC++));
-//			registers.SP = (UInt16)(registers.SP + m);
-//
-//			registers.flagH = CheckHFlag((ushort)(sp & 0xF), (ushort)m);
-//			registers.flagC = (sp & 0xFF) > (registers.SP & 0xFF);	
-//
-//			registers.flagZ=false; 
-//			registers.flagN=false;
 		} //LDHL SP,n 
 
 		//ld-nn-sp
