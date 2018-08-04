@@ -34,7 +34,10 @@ namespace brovador.GBEmulator.Debugger {
 			}
 
 			GUILayoutOption[] options = null;
+
+			GUILayout.Space(10);
 			debugger.enableBreakPoints = GUILayout.Toggle(debugger.enableBreakPoints, "Enable breakpoints", options);
+			GUILayout.Space(10);
 
 			GUILayout.BeginHorizontal();
 			string[] texts = {
