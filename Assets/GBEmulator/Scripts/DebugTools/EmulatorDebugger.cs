@@ -6,7 +6,7 @@ using System;
 using UnityEditor;
 #endif
 
-namespace brovador.GBEmulator {
+namespace brovador.GBEmulator.Debugger {
 
 	public class EmulatorDebugger : MonoBehaviour{
 
@@ -74,9 +74,10 @@ namespace brovador.GBEmulator {
 		public bool writeLog = false;
 
 		[Header("Breakpoints")]
-		public bool enableBreakPoints = true;
-		public string[] breakPoints;
-		public string[] memoryBreakPoints;
+
+		[HideInInspector] public bool enableBreakPoints = true;
+		[HideInInspector] public List<Breakpoint> breakPoints = new List<Breakpoint>();
+		[HideInInspector] public List<Breakpoint> memoryBreakPoints = new List<Breakpoint>();
 
 		Coroutine updateCoroutine;
 
@@ -131,9 +132,8 @@ namespace brovador.GBEmulator {
 		void MMUOnMemoryAccess (MMU mmu, ushort addr, bool isWrite)
 		{
 			if (enableBreakPoints && isWrite) {
-				string saddr = string.Format("0x{0:X4}", addr);
-				for (int i = 0; i < memoryBreakPoints.Length; i++) {
-					if (memoryBreakPoints[i] == saddr) {
+				for (int i = 0; i < memoryBreakPoints.Count; i++) {
+					if (memoryBreakPoints[i].IsActivated(emu)) {
 						Debug.Log(string.Format("<color=blue>PAUSED on memory access: {0:X4}</color>", addr));
 						emu.paused = true;
 						break;
@@ -155,9 +155,8 @@ namespace brovador.GBEmulator {
 			}
 
 			if (enableBreakPoints) {
-				string saddr = string.Format("0x{0:X4}", emu.cpu.registers.PC); 
-				for (int i = 0; i < breakPoints.Length; i++) {
-					if (breakPoints[i] == saddr) {
+				for (int i = 0; i < breakPoints.Count; i++) {
+					if (breakPoints[i].IsActivated(emu)) {
 						emu.paused = true;
 						break;
 					}
