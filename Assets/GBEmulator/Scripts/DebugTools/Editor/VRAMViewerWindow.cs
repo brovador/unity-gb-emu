@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using brovador.GBEmulator;
+
+namespace brovador.GBEmulator.Debugger {
 
 public class VRAMViewerWindow : EditorWindow {
 
@@ -43,20 +44,11 @@ public class VRAMViewerWindow : EditorWindow {
 			emu = GameObject.FindObjectOfType<Emulator>();
 		}
 
-
-		GUILayout.BeginHorizontal();
-		if (GUILayout.Button("BG map")) {
-			selectedView = 0;
-		} else if (GUILayout.Button("Tiles")) {
-			selectedView = 1;
-		} else if (GUILayout.Button("OAM")) {
-			selectedView = 2;
-		} else if (GUILayout.Button("Palettes")) {
-			selectedView = 3;
-		}
-		GUILayout.EndHorizontal();
-
-
+		string[] optionTitles = {
+			"BG Map", "Tiles", "OAM", "Palettes"
+		};
+		GUILayoutOption[] options = null;
+		selectedView = GUILayout.Toolbar(selectedView, optionTitles, options);
 
 		if (emu == null || !emu.isOn || !Application.isPlaying) {
 			tilesTextures = null;
@@ -160,4 +152,5 @@ public class VRAMViewerWindow : EditorWindow {
 			}
 		}
 	}
+}
 }
