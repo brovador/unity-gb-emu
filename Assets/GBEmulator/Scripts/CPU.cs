@@ -464,8 +464,25 @@ namespace brovador.GBEmulator {
 		void OP_39() { UInt16 hl=registers.HL; registers.HL+=registers.SP; registers.flagN=false; registers.flagH=CheckHFlag(hl, registers.SP, is16bit:true); registers.flagC=(hl>registers.HL); } //ADD HL SP
 
 		//add-sp-n
-		#warning set flags carry and half-carry? (jsGB doesn't do it)
-		void OP_E8() { registers.SP=(UInt16)(registers.SP+DecodeSigned(mmu.Read(registers.PC++))); registers.flagZ=false; registers.flagN=false; }
+		void OP_E8() { 
+
+			UInt16 sp=registers.SP;
+			int m = DecodeSigned(mmu.Read(registers.PC++));
+			registers.SP = (UInt16)(registers.SP + m);
+
+			if (m >= 0) {
+				registers.flagH = CheckHFlag((ushort)(sp & 0xF), (ushort)m);
+				registers.flagC = (sp & 0xFF) > (registers.SP & 0xFF);	
+			} else {
+				registers.flagH = CheckHFlag((ushort)(sp & 0xF), (ushort)(Math.Abs(m)), true);
+				registers.flagC = (sp & 0xFF) < (registers.SP & 0xFF);
+			}
+
+			registers.flagZ=false; 
+			registers.flagN=false; 
+
+			Debug.Log(string.Format("HL: {4:X4} ===> AF: {2:X4}, SP: {3:X4}", sp, m, registers.AF, registers.SP, registers.HL));
+		}
 
 		//inc-nn
 		void OP_03() { registers.BC++; } //INC BC
