@@ -104,7 +104,7 @@ namespace brovador.GBEmulator.Debugger {
 
 			GUILayout.Space(10);
 			if (GUILayout.Button("Add")) {
-				debugger.breakPoints.Add(new Breakpoint());
+				breakpoints.Add(new Breakpoint());
 			}
 			GUILayout.EndScrollView();
 
