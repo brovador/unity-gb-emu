@@ -484,42 +484,22 @@ namespace brovador.GBEmulator {
 		#region misc functions
 
 		//DAA
-		#warning Review DAA instruction
 		void OP_27() {
 
-//			var a = registers.A;
-//
-//			if(((registers.F&(byte)0x20) != 0)||((registers.A&15)>9)) registers.A+=(byte)6; 
-//			registers.F&=0xEF;
-//			if(((registers.F&(byte)0x20) != 0)||(a>0x99)) { registers.A+=0x60; registers.F|=0x10; }
+			//https://forums.nesdev.com/viewtopic.php?f=20&t=15944
+			var a = registers.A;
 
-
-			var tmp = registers.A;
 			if (!registers.flagN) {
-				//BCD adjust for addition
-				if (registers.flagH || ((tmp & 0x0F) > 0x09)) tmp += 0x06;
-				if (registers.flagC || (tmp > 0x9F)) tmp += 0x60;
+				if (registers.flagC || a > 0x99) { a += 0x60; registers.flagC = true; }
+				if (registers.flagH || (a & 0x0F) > 0x09) { a += 0x06; }
 			} else {
-				//BCD adjust for substraction
-				if (registers.flagH) tmp = (byte)((tmp - 0x06) & 0xFF);
-				if (registers.flagC) tmp = (byte)((tmp - 0x60) & 0xFF);
+				if (registers.flagC) { a -= 0x60; }
+				if (registers.flagH) { a -= 0x06; }
 			}
 
+			registers.A = a;
+			registers.flagZ = (registers.A == 0);
 			registers.flagH = false;
-			registers.flagC = tmp < registers.A;
-			registers.flagZ = tmp == 0;
-			registers.A = tmp;
-
-
-//			registers.flagC = false;
-//			registers.flagH = false;
-//			if ((0x0F & registers.A) > 9 || registers.flagH)
-//				registers.A += 0x06;
-//			if (((0xF0 & registers.A) >> 4) > 9 || registers.flagC) {
-//				registers.A += 0x60;
-//				registers.flagC = true;
-//			}
-//			registers.flagZ = (registers.A == 0);
 		}
 
 		//cpl
