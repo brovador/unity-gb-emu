@@ -12,7 +12,7 @@ namespace brovador.GBEmulator.Debugger {
 		[MenuItem("GBTools/Windows/Breakpoints")]
 		static void GetWindow()
 		{
-			EditorWindow window = EditorWindow.GetWindow<BreakpointsWindow>();
+			EditorWindow window = EditorWindow.GetWindow<BreakpointsWindow>("Breakpoints");
 			window.Show();
 		}
 

@@ -12,7 +12,7 @@ public class VRAMViewerWindow : EditorWindow {
 	[MenuItem("GBTools/Windows/VRAM Viewer")]
 	static void GetWindow()
 	{
-		EditorWindow window = EditorWindow.GetWindow<VRAMViewerWindow>();
+		EditorWindow window = EditorWindow.GetWindow<VRAMViewerWindow>("VRAM Viewer");
 		window.Show();
 	}
 
