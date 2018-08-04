@@ -71,6 +71,8 @@ namespace brovador.GBEmulator {
 		public Emulator emu { get; private set; }
 		public bool stop { get; private set; }
 
+		public bool writeLog = false;
+
 		[Header("Breakpoints")]
 		public bool enableBreakPoints = true;
 		public string[] breakPoints;
@@ -92,6 +94,23 @@ namespace brovador.GBEmulator {
 			emu.OnEmulatorOn -= Emu_OnEmulatorOn;
 			emu.OnEmulatorOff -= Emu_OnEmulatorOff;
 			emu.OnEmulatorStep -= OnEmulatorStepUpdate;
+		}
+
+		void Update()
+		{
+			if (emu.paused) {
+				if (Input.GetKeyDown(KeyCode.S)) {
+					emu.EmulatorStep();
+				}
+			}
+
+			if (Input.GetKey(KeyCode.R)) {
+				emu.paused = false;
+			}
+
+			if (Input.GetKeyDown(KeyCode.P)) {
+				emu.paused = true;
+			}
 		}
 
 
@@ -124,15 +143,16 @@ namespace brovador.GBEmulator {
 		}
 
 
-//		System.IO.StreamWriter writer;
+		System.IO.StreamWriter writer;
 
 		public void OnEmulatorStepUpdate(Emulator emu)
 		{
-//			if (writer == null) {
-//				writer = System.IO.File.CreateText("./log.txt");
-//			}
-//
-//			writer.WriteLine(string.Format("PC: {0}, INSTR: {1}", emu.cpu.registers.PC, OperationNameAtAddress(emu.cpu.registers.PC)));
+			if (writeLog) {
+				if (writer == null) {
+					writer = System.IO.File.CreateText("./log.txt");
+				}
+				writer.WriteLine(string.Format("{0:X4}: {1}", emu.cpu.registers.PC, OperationNameAtAddress(emu.cpu.registers.PC)));
+			}
 
 			if (enableBreakPoints) {
 				string saddr = string.Format("0x{0:X4}", emu.cpu.registers.PC); 
@@ -255,8 +275,17 @@ namespace brovador.GBEmulator {
 			}
 
 
+			GUILayout.Label("Hotkeys:");
+			GUILayout.Label("R: run (continue)");
+			GUILayout.Label("P: pause");
+			GUILayout.Label("S: next step");
+
+
 			if (emu.isOn && emu.paused) {
 				GUILayout.Space(30);
+
+
+
 				if (GUILayout.Button("Next step")) {
 					emu.EmulatorStep();
 				}
