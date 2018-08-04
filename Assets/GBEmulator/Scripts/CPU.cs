@@ -470,18 +470,11 @@ namespace brovador.GBEmulator {
 			int m = DecodeSigned(mmu.Read(registers.PC++));
 			registers.SP = (UInt16)(registers.SP + m);
 
-			if (m >= 0) {
-				registers.flagH = CheckHFlag((ushort)(sp & 0xF), (ushort)m);
-				registers.flagC = (sp & 0xFF) > (registers.SP & 0xFF);	
-			} else {
-				registers.flagH = CheckHFlag((ushort)(sp & 0xF), (ushort)(Math.Abs(m)), true);
-				registers.flagC = (sp & 0xFF) < (registers.SP & 0xFF);
-			}
+			registers.flagH = CheckHFlag((ushort)(sp & 0xF), (ushort)m);
+			registers.flagC = (sp & 0xFF) > (registers.SP & 0xFF);	
 
 			registers.flagZ=false; 
 			registers.flagN=false; 
-
-			Debug.Log(string.Format("HL: {4:X4} ===> AF: {2:X4}, SP: {3:X4}", sp, m, registers.AF, registers.SP, registers.HL));
 		}
 
 		//inc-nn
