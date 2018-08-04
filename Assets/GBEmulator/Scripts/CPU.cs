@@ -322,8 +322,28 @@ namespace brovador.GBEmulator {
 		void OP_F9() { registers.SP=registers.HL; } //LD SP,HL
 
 		//ldhl-sp-n
-		#warning set flags carry and half-carry? (jsGB doesn't do it)
-		void OP_F8() { registers.HL=(UInt16)(registers.SP+DecodeSigned(mmu.Read(registers.PC++))); registers.flagZ=false; registers.flagN=false; } //LDHL SP,n 
+		void OP_F8() { 
+
+			int m = DecodeSigned(mmu.Read(registers.PC++));
+			registers.HL = (UInt16)(registers.SP + m); 
+
+			registers.flagH = CheckHFlag((ushort)(registers.SP & 0xF), (ushort)m);
+			registers.flagC = (registers.SP & 0xFF) > (registers.HL & 0xFF);
+				
+			registers.flagZ=false; 
+			registers.flagN=false; 
+
+
+//			UInt16 sp=registers.SP;
+//			int m = DecodeSigned(mmu.Read(registers.PC++));
+//			registers.SP = (UInt16)(registers.SP + m);
+//
+//			registers.flagH = CheckHFlag((ushort)(sp & 0xF), (ushort)m);
+//			registers.flagC = (sp & 0xFF) > (registers.SP & 0xFF);	
+//
+//			registers.flagZ=false; 
+//			registers.flagN=false;
+		} //LDHL SP,n 
 
 		//ld-nn-sp
 		void OP_08() { mmu.WriteW(mmu.ReadW(registers.PC), registers.SP); registers.PC+=2; } //LD (nn),SP
@@ -474,7 +494,7 @@ namespace brovador.GBEmulator {
 			registers.flagC = (sp & 0xFF) > (registers.SP & 0xFF);	
 
 			registers.flagZ=false; 
-			registers.flagN=false; 
+			registers.flagN=false;
 		}
 
 		//inc-nn
