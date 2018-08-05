@@ -149,7 +149,6 @@ namespace brovador.GBEmulator {
 		public float LastFrameTime { get; private set; }
 		IEnumerator EmulatorCoroutine()
 		{
-			#warning Why I need to multiply this???
 			var cyclesPerSecond = cpu.clockSpeed / FPS;
 
 			while (true) {

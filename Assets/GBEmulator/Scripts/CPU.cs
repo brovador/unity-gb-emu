@@ -631,7 +631,6 @@ namespace brovador.GBEmulator {
 		#region Restarts & returns
 
 		//rst
-		#warning jsGB saves here all the registers and rstore them on RETI
 		void OP_C7() { registers.SP -= 2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x00; } //RST 00H
 		void OP_CF() { registers.SP -= 2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x08; } //RST 08H
 		void OP_D7() { registers.SP -= 2; mmu.WriteW(registers.SP, registers.PC); registers.PC=0x10; } //RST 10H
@@ -657,14 +656,12 @@ namespace brovador.GBEmulator {
 		void OP_D8() { if (registers.flagC) { registers.PC=mmu.ReadW(registers.SP); registers.SP+=2; } }
 
 		//ret
-		#warning jsGB restores all the registers here
 		void OP_D9() { registers.PC=mmu.ReadW(registers.SP); registers.SP+=2; ime = true; }
 
 		#endregion
 
 		#region CB operations
 
-		#warning review if cycles need to be adjusted (CB has 4 + instruction ones)
 		void OP_CB() {
 			var op = mmu.Read(registers.PC++);
 			cbOperations[op]();
