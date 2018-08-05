@@ -560,10 +560,10 @@ namespace brovador.GBEmulator {
 
 		//rla
 		void OP_17() {
-			bool flagC = registers.flagC;
+			var result = (byte)((registers.A << 1) | (registers.flagC?0x01:0x00));
 			registers.flagC = ((registers.A >> 7) != 0); 
-			registers.A = (byte)((registers.A << 1) | (flagC?0x01:0x00));
-			registers.flagZ = (registers.A == 0); 
+			registers.A = result;
+			registers.flagZ = false; 
 			registers.flagH = false; 
 			registers.flagN = false; 
 		}
@@ -573,17 +573,17 @@ namespace brovador.GBEmulator {
 		void OP_0F() { 
 			registers.flagC = ((registers.A & 0x01) != 0); 
 			registers.A = (byte)((registers.A >> 1) | ((registers.flagC?0x01:0x00) << 7)); 
-			registers.flagZ = (registers.A == 0); 
+			registers.flagZ = false; 
 			registers.flagH = false; 
-			registers.flagN = false; 
+			registers.flagN = false;
 		}
 
 		//rra
 		void OP_1F() {
-			bool flagC = registers.flagC;
+			var result = (byte)((registers.A >> 1) | ((registers.flagC ? 0x01 : 0x00) << 7));
 			registers.flagC = ((registers.A&0x01) != 0); 
-			registers.A = (byte)((registers.A >> 1) | (flagC?0x80:0x00));
-			registers.flagZ = (registers.A == 0); 
+			registers.A = result;
+			registers.flagZ = false; 
 			registers.flagH = false; 
 			registers.flagN = false; 
 		}
