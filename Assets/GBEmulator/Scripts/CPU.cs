@@ -551,9 +551,9 @@ namespace brovador.GBEmulator {
 
 		//rlca
 		void OP_07() { 
-			registers.flagC = ((registers.A & 0x80) != 0); 
-			registers.A = (byte)((registers.A << 1) | ((registers.flagC?0x00:0x01) >> 7)); 
-			registers.flagZ = (registers.A == 0); 
+			registers.flagC = ((registers.A >> 7) != 0); 
+			registers.A = (byte)((registers.A << 1) | (registers.flagC?0x01:0x00)); 
+			registers.flagZ = false; 
 			registers.flagH = false; 
 			registers.flagN = false; 
 		}
