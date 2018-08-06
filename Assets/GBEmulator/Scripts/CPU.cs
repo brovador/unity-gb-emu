@@ -22,7 +22,7 @@ namespace brovador.GBEmulator {
 
 		public struct Timers {
 			public uint t;
-			public uint lastOpCycles;
+//			public uint lastOpCycles;
 //			public uint m;
 		}
 
@@ -165,36 +165,56 @@ namespace brovador.GBEmulator {
 			};
 		}
 
-		public void Step()
+		public uint Step()
 		{
 			var op = mmu.Read(registers.PC++);
+			var opCycles = opcodeCycles[op];
+			var interruptCycles = 0;
+
 			operations[op]();
-			timers.lastOpCycles = opcodeCycles[op];
-			timers.t += timers.lastOpCycles;
 
 			if (ime && mmu.HasInterrupts()) {
 				ime = false;
 				halt = false;
+
 				if (mmu.CheckInterrupt(MMU.InterruptType.VBlank)) {
 					mmu.ClearInterrupt(MMU.InterruptType.VBlank);
+					interruptCycles = 12;
 					RST_40();
 				} else if (mmu.CheckInterrupt(MMU.InterruptType.LCDCStatus)) {
 					mmu.ClearInterrupt(MMU.InterruptType.LCDCStatus);
+					interruptCycles = 12;
 					RST_48();
 				} else if (mmu.CheckInterrupt(MMU.InterruptType.TimerOverflow)) {
 					mmu.ClearInterrupt(MMU.InterruptType.TimerOverflow);
+					interruptCycles = 12;
 					RST_50();
 				} else if (mmu.CheckInterrupt(MMU.InterruptType.SerialTransferCompletion)) {
 					mmu.ClearInterrupt(MMU.InterruptType.SerialTransferCompletion);
+					interruptCycles = 12;
 					RST_58();
 				} else if (mmu.CheckInterrupt(MMU.InterruptType.HighToLowP10P13)) {
 					mmu.ClearInterrupt(MMU.InterruptType.HighToLowP10P13);
+					interruptCycles = 12;
 					RST_60();
 				} else {
 					ime = true;
 				}
 			}
+
+			timers.t += opCycles;
+
+			return (uint)(opCycles + interruptCycles);
 		}
+
+
+		public uint HandleInterrupts()
+		{
+			uint opCycles = 0;
+
+			return opCycles;
+		}
+
 
 
 		#region 8bit loads

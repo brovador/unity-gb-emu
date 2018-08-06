@@ -13,7 +13,6 @@ namespace brovador.GBEmulator {
 			VRAMRead
 		}
 
-		CPU cpu;
 		MMU mmu;
 
 		#warning this should be in memory
@@ -33,9 +32,8 @@ namespace brovador.GBEmulator {
 
 		public int MAX_LINES = 143;
 
-		public GPU(CPU cpu, MMU mmu) 
+		public GPU(MMU mmu) 
 		{
-			this.cpu = cpu;
 			this.mmu = mmu;
 
 			gpuMode = GPUMode.HBlank;
@@ -44,9 +42,9 @@ namespace brovador.GBEmulator {
 		}
 
 
-		public void Step()
+		public void Step(uint opCycles)
 		{
-			clock += cpu.timers.lastOpCycles;
+			clock += opCycles;
 
 			switch (gpuMode) {
 

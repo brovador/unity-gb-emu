@@ -25,12 +25,14 @@ namespace brovador.GBEmulator {
 		[HideInInspector] public CPU cpu;
 		[HideInInspector] public MMU mmu;
 		[HideInInspector] public GPU gpu;
+		[HideInInspector] public Timer timer;
 
 		void Init()
 		{
 			mmu = new MMU();
 			cpu = new CPU(mmu);
-			gpu = new GPU(cpu, mmu);
+			gpu = new GPU(mmu);
+			timer = new Timer(mmu);
 		}
 
 		#region Public
@@ -82,8 +84,9 @@ namespace brovador.GBEmulator {
 
 		public void EmulatorStep()
 		{
-			cpu.Step();
-			gpu.Step();
+			var opCycles = cpu.Step();
+			timer.Step(opCycles);
+			gpu.Step(opCycles);
 		}
 
 
