@@ -22,8 +22,6 @@ namespace brovador.GBEmulator {
 
 		public struct Timers {
 			public uint t;
-//			public uint lastOpCycles;
-//			public uint m;
 		}
 
 		public struct Registers
@@ -125,6 +123,7 @@ namespace brovador.GBEmulator {
 		public CPU(MMU mmu) {
 			this.mmu = mmu;
 			timers.t = 0;
+			halt = false;
 
 			operations = new System.Action[] {
 				OP_00,OP_01,OP_02,OP_03,OP_04,OP_05,OP_06,OP_07,OP_08,OP_09,OP_0A,OP_0B,OP_0C,OP_0D,OP_0E,OP_0F,
@@ -167,54 +166,49 @@ namespace brovador.GBEmulator {
 
 		public uint Step()
 		{
-			var op = mmu.Read(registers.PC++);
-			var opCycles = opcodeCycles[op];
-			var interruptCycles = 0;
+			uint opCycles = 0;
+			uint interruptCycles = 0;
 
-			operations[op]();
+			if (halt) {
+				opCycles = 4;	
+			} else {
+				var op = mmu.Read(registers.PC++);
+				opCycles = opcodeCycles[op];
+				operations[op]();
+			}
+
+			halt = halt && !mmu.HasInterrupts();
 
 			if (ime && mmu.HasInterrupts()) {
 				ime = false;
-				halt = false;
+				interruptCycles = 12;
 
 				if (mmu.CheckInterrupt(MMU.InterruptType.VBlank)) {
 					mmu.ClearInterrupt(MMU.InterruptType.VBlank);
-					interruptCycles = 12;
 					RST_40();
 				} else if (mmu.CheckInterrupt(MMU.InterruptType.LCDCStatus)) {
 					mmu.ClearInterrupt(MMU.InterruptType.LCDCStatus);
-					interruptCycles = 12;
 					RST_48();
 				} else if (mmu.CheckInterrupt(MMU.InterruptType.TimerOverflow)) {
 					mmu.ClearInterrupt(MMU.InterruptType.TimerOverflow);
-					interruptCycles = 12;
 					RST_50();
 				} else if (mmu.CheckInterrupt(MMU.InterruptType.SerialTransferCompletion)) {
 					mmu.ClearInterrupt(MMU.InterruptType.SerialTransferCompletion);
-					interruptCycles = 12;
 					RST_58();
 				} else if (mmu.CheckInterrupt(MMU.InterruptType.HighToLowP10P13)) {
 					mmu.ClearInterrupt(MMU.InterruptType.HighToLowP10P13);
-					interruptCycles = 12;
 					RST_60();
 				} else {
+					Debug.Log("PC: unknown interrupt");
 					ime = true;
+					interruptCycles = 0;
 				}
 			}
 
 			timers.t += opCycles;
 
-			return (uint)(opCycles + interruptCycles);
+			return opCycles + interruptCycles;
 		}
-
-
-		public uint HandleInterrupts()
-		{
-			uint opCycles = 0;
-
-			return opCycles;
-		}
-
 
 
 		#region 8bit loads
@@ -675,7 +669,7 @@ namespace brovador.GBEmulator {
 		void OP_D0() { if (!registers.flagC) { registers.PC=mmu.ReadW(registers.SP); registers.SP+=2; } }
 		void OP_D8() { if (registers.flagC) { registers.PC=mmu.ReadW(registers.SP); registers.SP+=2; } }
 
-		//ret
+		//reti
 		void OP_D9() { registers.PC=mmu.ReadW(registers.SP); registers.SP+=2; ime = true; }
 
 		#endregion

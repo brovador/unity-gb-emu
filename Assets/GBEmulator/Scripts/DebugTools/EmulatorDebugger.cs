@@ -228,6 +228,12 @@ namespace brovador.GBEmulator.Debugger {
 				GUILayout.Label(string.Format("spd: {0}", "??"));
 				GUILayout.Label(string.Format("rom: {0}", "??"));
 				GUILayout.EndVertical();
+				GUILayout.BeginVertical();
+				GUILayout.Label(string.Format("DIV: {0:X2}", emu.timer.DIV));
+				GUILayout.Label(string.Format("TIMA: {0:X2}", emu.timer.TIMA));
+				GUILayout.Label(string.Format("TMA: {0:X2}", emu.timer.TMA));
+				GUILayout.Label(string.Format("TAC: {0:X2}", emu.timer.TAC));
+				GUILayout.EndVertical();
 				GUILayout.EndHorizontal();
 
 			} else if (GUILayout.Button("Start emulation")) {
