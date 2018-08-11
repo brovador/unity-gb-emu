@@ -131,6 +131,8 @@ namespace brovador.GBEmulator {
 			mmu.Write((UInt16)0xFF4A, (byte)0x00);
 			mmu.Write((UInt16)0xFF4B, (byte)0x00);
 			mmu.Write((UInt16)0xFFFF, (byte)0x00);
+
+			mmu.IOWrite((ushort)0xFF00, (byte)0xFF);
 		}
 
 
