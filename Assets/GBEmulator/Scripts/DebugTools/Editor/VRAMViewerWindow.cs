@@ -19,23 +19,12 @@ namespace brovador.GBEmulator.Debugger {
 
 		Emulator emu = null;
 
-		Texture2D[] tilesTextures;
-		public void InitTextures(bool forced = false)
-		{
-			if (tilesTextures == null || tilesTextures.Length < TOTAL_TILES || forced) {
-				tilesTextures = new Texture2D[TOTAL_TILES];
-				for (int i = 0; i < tilesTextures.Length; i++) {
-					var t = new Texture2D(8, 8, TextureFormat.ARGB32, false);
-					for (int j = 0; j < 64; j++) {
-						t.SetPixel(j / 8, j % 8, Color.black);
-						t.Apply();
-					}
-					tilesTextures[i] = t;
-				}
-			}
-		}
 
-		public int selectedView = 0;
+		int selectedView = 0;
+
+		Dictionary<uint, Color[]> tiles = new Dictionary<uint, Color[]>();
+		Texture2D vramTexture;
+		Texture2D tilesTexture;
 
 		void OnGUI()
 		{
@@ -44,8 +33,6 @@ namespace brovador.GBEmulator.Debugger {
 				emu = GameObject.FindObjectOfType<Emulator>();
 			}
 
-			updateWindow = EditorGUILayout.Toggle("Update window", updateWindow);
-
 			string[] optionTitles = {
 				"BG Map", "Tiles", "OAM", "Palettes"
 			};
@@ -53,7 +40,6 @@ namespace brovador.GBEmulator.Debugger {
 			selectedView = GUILayout.Toolbar(selectedView, optionTitles, options);
 
 			if (emu == null || !emu.isOn || !Application.isPlaying) {
-				tilesTextures = null;
 				return;
 			}
 
@@ -64,62 +50,58 @@ namespace brovador.GBEmulator.Debugger {
 			}
 		}
 
-		bool updateWindow = false;
+
 		void OnInspectorUpdate()
 		{
-			if (updateWindow) {
-				this.Repaint();
-			}
+			this.Repaint();
 		}
 
 
 		void ShowBGMap()
 		{
-			int tilePreviewSize = 8;
-			int backgroundSize = 32;
-
-			InitTextures();
-			UpdateTilesTextures();
-
-			GUILayout.BeginVertical();
+			UpdateTilesDict();
+			if (vramTexture == null) {
+				vramTexture = new Texture2D(32 * 8, 32 * 8, TextureFormat.ARGB32, false);
+				vramTexture.filterMode = FilterMode.Point;
+			}
 			var addr = 0x9800;
-			for (int i = 0; i < backgroundSize; i++) {
-				GUILayout.BeginHorizontal();
-				for (int j = 0; j < backgroundSize; j++) {
-					Texture2D t = tilesTextures[emu.mmu.Read((ushort)(addr + i * backgroundSize + j))];
-					DrawTexture(tilePreviewSize, t);
+			for (int i = 0; i < 32; i++) {
+				for (int j = 0; j < 32; j++) {
+					byte n = emu.mmu.Read((ushort)(addr + i * 32 + j));
+					Color[] tile = tiles[n];
+					vramTexture.SetPixels(j * 8, (31 - i) * 8, 8, 8, tile);
 				}
-				GUILayout.EndHorizontal();
 			}
-			GUILayout.EndVertical();
+			vramTexture.Apply();
+			DrawTexture(vramTexture, 32);
 		}
 
 
-		void ShowTiles ()
+		void ShowTiles()
 		{
-			int tilePreviewSize = 8;
-			int tilesPerRow = 16;
-
-			InitTextures();
-			UpdateTilesTextures();
-			
-			GUILayout.BeginVertical();
-			for (int i = 0; i < tilesPerRow; i++) {
-				GUILayout.BeginHorizontal();
-				for (int j = 0; j < tilesPerRow; j++) {
-					Texture2D t = tilesTextures[i * tilesPerRow + j];
-					DrawTexture(tilePreviewSize, t);
-				}
-				GUILayout.EndHorizontal();
+			UpdateTilesDict();
+			if (tilesTexture == null) {
+				tilesTexture = new Texture2D(16 * 8, 16 * 8, TextureFormat.ARGB32, false);
+				tilesTexture.filterMode = FilterMode.Point;
 			}
-			GUILayout.EndVertical();
+			for (int i = 0; i < 16; i++) {
+				for (int j = 0; j < 16; j++) {
+					Color[] tile = tiles[(uint)(i * 16 + j)];
+					tilesTexture.SetPixels(j * 8, (15 - i) * 8, 8, 8, tile); 
+				}
+			}
+			tilesTexture.Apply();
+			DrawTexture(tilesTexture, 32);
 		}
 
 
-		void DrawTexture(int size, Texture2D t)
+		void DrawTexture(Texture2D t, int size)
 		{
+			int textureScale = 8;
+			size = size * textureScale;
+
 			GUIStyle buttonStyle = new GUIStyle(GUI.skin.label);
-			buttonStyle.margin = new RectOffset(1, 1, 1, 1);
+			buttonStyle.margin = new RectOffset(0, 0, 0, 0);
 
 			GUILayoutOption[] options = {
 				GUILayout.Width(size), GUILayout.Height(size)
@@ -127,8 +109,9 @@ namespace brovador.GBEmulator.Debugger {
 
 			GUILayout.Box("", buttonStyle, options);
 			var rect = GUILayoutUtility.GetLastRect();
-			GUI.DrawTexture(rect, t); 
+			GUI.DrawTexture(rect, t);
 		}
+
 
 		Color[] colors = {
 			new Color(224.0f / 255.0f, 248.0f / 255.0f, 208.0f / 255.0f),
@@ -137,29 +120,27 @@ namespace brovador.GBEmulator.Debugger {
 			new Color(8.0f / 255.0f, 24.0f / 255.0f, 32.0f / 255.0f)
 		};
 
-		void UpdateTilesTextures()
+		void UpdateTilesDict()
 		{
+			tiles.Clear();
+
 			for (int n = 0; n < TOTAL_TILES; n++) {
 				var addr = (uint)(0x8000 + 16 * n);
-				var tex = tilesTextures[n];
-
+				Color[] tile = new Color[8 * 8];
 				for (int i = 0; i < 8; i++) {
 					byte b1 = emu.mmu.Read((ushort)(addr + i * 2));
 					byte b2 = emu.mmu.Read((ushort)(addr + i * 2 + 1));
 
-					Color[] line = new Color[8];
-					line[0] = colors[(int)((b1 & 0x80) >> 7) + (int)((b2 & 0x80) >> 7)];
-					line[1] = colors[(int)((b1 & 0x40) >> 6) + (int)((b2 & 0x40) >> 6)];
-					line[2] = colors[(int)((b1 & 0x20) >> 5) + (int)((b2 & 0x20) >> 5)];
-					line[3] = colors[(int)((b1 & 0x10) >> 4) + (int)((b2 & 0x10) >> 4)];
-					line[4] = colors[(int)((b1 & 0x08) >> 3) + (int)((b2 & 0x08) >> 3)];
-					line[5] = colors[(int)((b1 & 0x04) >> 2) + (int)((b2 & 0x04) >> 2)];
-					line[6] = colors[(int)((b1 & 0x02) >> 1) + (int)((b2 & 0x02) >> 1)];
-					line[7] = colors[(int)((b1 & 0x01)) + (int)((b2 & 0x01))];
-
-					tex.SetPixels(0, 7 - i, line.Length, 1, line);
-					tex.Apply();
+					tile[(7 - i) * 8] = colors[(int)((b1 & 0x80) >> 7) + (int)((b2 & 0x80) >> 7)];
+					tile[(7 - i) * 8 + 1] = colors[(int)((b1 & 0x40) >> 6) + (int)((b2 & 0x40) >> 6)];
+					tile[(7 - i) * 8 + 2] = colors[(int)((b1 & 0x20) >> 5) + (int)((b2 & 0x20) >> 5)];
+					tile[(7 - i) * 8 + 3] = colors[(int)((b1 & 0x10) >> 4) + (int)((b2 & 0x10) >> 4)];
+					tile[(7 - i) * 8 + 4] = colors[(int)((b1 & 0x08) >> 3) + (int)((b2 & 0x08) >> 3)];
+					tile[(7 - i) * 8 + 5] = colors[(int)((b1 & 0x04) >> 2) + (int)((b2 & 0x04) >> 2)];
+					tile[(7 - i) * 8 + 6] = colors[(int)((b1 & 0x02) >> 1) + (int)((b2 & 0x02) >> 1)];
+					tile[(7 - i) * 8 + 7] = colors[(int)((b1 & 0x01)) + (int)((b2 & 0x01))];
 				}
+				tiles[(uint)n] = tile;
 			}
 		}
 	}
