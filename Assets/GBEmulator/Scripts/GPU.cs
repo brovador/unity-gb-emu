@@ -20,7 +20,11 @@ namespace brovador.GBEmulator {
 
 		byte CurrentLine {
 			get { return mmu.Read(0xFF44); }
-			set { mmu.Write(0xFF44, (byte)value); }
+			set { mmu.IOWrite(0xFF44, (byte)value); }
+		}
+
+		public int SelectedTileDataBG {
+			get { return (mmu.Read(0xFF40) & 0x10) == 0 ? 0 : 1; }
 		}
 
 		uint clock;

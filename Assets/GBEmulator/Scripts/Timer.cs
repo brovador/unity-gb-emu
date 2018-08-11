@@ -14,7 +14,7 @@ namespace brovador.GBEmulator {
 
 		public byte DIV {
 			get { return mmu.Read(0xFF04); }
-			set { mmu.IOWriteDivider(value); }
+			set { mmu.IOWrite(0xFF04, value); }
 		}
 
 		//Counter
