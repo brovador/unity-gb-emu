@@ -67,8 +67,16 @@ namespace brovador.GBEmulator.Debugger {
 			var addr = 0x9800;
 			for (int i = 0; i < 32; i++) {
 				for (int j = 0; j < 32; j++) {
-					byte n = emu.mmu.Read((ushort)(addr + i * 32 + j));
-					Color[] tile = tiles[n];
+
+					int n = (int)emu.mmu.Read((ushort)(addr + i * 32 + j));
+					if (emu.gpu.SelectedTileDataBG == 0) {
+						if (n > 127) {
+							n -= 0x100;
+						}
+						n = 256 + n;
+					}
+
+					Color[] tile = tiles[(uint)n];
 					vramTexture.SetPixels(j * 8, (31 - i) * 8, 8, 8, tile);
 				}
 			}
@@ -81,13 +89,13 @@ namespace brovador.GBEmulator.Debugger {
 		{
 			UpdateTilesDict();
 			if (tilesTexture == null) {
-				tilesTexture = new Texture2D(16 * 8, 16 * 8, TextureFormat.ARGB32, false);
+				tilesTexture = new Texture2D(32 * 8, 32 * 8, TextureFormat.ARGB32, false);
 				tilesTexture.filterMode = FilterMode.Point;
 			}
-			for (int i = 0; i < 16; i++) {
+			for (int i = 0; i < 32; i++) {
 				for (int j = 0; j < 16; j++) {
 					Color[] tile = tiles[(uint)(i * 16 + j)];
-					tilesTexture.SetPixels(j * 8, (15 - i) * 8, 8, 8, tile); 
+					tilesTexture.SetPixels(j * 8, (31 - i) * 8, 8, 8, tile); 
 				}
 			}
 			tilesTexture.Apply();
