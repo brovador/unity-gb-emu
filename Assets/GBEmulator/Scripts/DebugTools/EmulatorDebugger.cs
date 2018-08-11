@@ -221,7 +221,7 @@ namespace brovador.GBEmulator.Debugger {
 				GUILayout.BeginVertical();
 				GUILayout.Label(string.Format("lcd: {0}", "??")); 
 				GUILayout.Label(string.Format("stat:{0}", "??")); 
-				GUILayout.Label(string.Format("ly:  {0}", "??"));
+				GUILayout.Label(string.Format("ly:  {0}", emu.mmu.Read(0xFF44)));
 				GUILayout.Label(string.Format("cnt: {0}", "??"));
 				GUILayout.Label(string.Format("IE:  {0:X2}", emu.mmu.Read(0xFFFF))); 
 				GUILayout.Label(string.Format("IF:  {0:X2}", emu.mmu.Read(0xFF0F))); 
