@@ -139,14 +139,14 @@ namespace brovador.GBEmulator.Debugger {
 					byte b1 = emu.mmu.Read((ushort)(addr + i * 2));
 					byte b2 = emu.mmu.Read((ushort)(addr + i * 2 + 1));
 
-					tile[(7 - i) * 8] = colors[(int)((b1 & 0x80) >> 7) + (int)((b2 & 0x80) >> 7)];
-					tile[(7 - i) * 8 + 1] = colors[(int)((b1 & 0x40) >> 6) + (int)((b2 & 0x40) >> 6)];
-					tile[(7 - i) * 8 + 2] = colors[(int)((b1 & 0x20) >> 5) + (int)((b2 & 0x20) >> 5)];
-					tile[(7 - i) * 8 + 3] = colors[(int)((b1 & 0x10) >> 4) + (int)((b2 & 0x10) >> 4)];
-					tile[(7 - i) * 8 + 4] = colors[(int)((b1 & 0x08) >> 3) + (int)((b2 & 0x08) >> 3)];
-					tile[(7 - i) * 8 + 5] = colors[(int)((b1 & 0x04) >> 2) + (int)((b2 & 0x04) >> 2)];
-					tile[(7 - i) * 8 + 6] = colors[(int)((b1 & 0x02) >> 1) + (int)((b2 & 0x02) >> 1)];
-					tile[(7 - i) * 8 + 7] = colors[(int)((b1 & 0x01)) + (int)((b2 & 0x01))];
+					tile[(7 - i) * 8] = colors[(int)((b1 & 0x80) >> 7) + (int)((b2 & 0x80) >> 6)];
+					tile[(7 - i) * 8 + 1] = colors[(int)((b1 & 0x40) >> 6) + (int)((b2 & 0x40) >> 5)];
+					tile[(7 - i) * 8 + 2] = colors[(int)((b1 & 0x20) >> 5) + (int)((b2 & 0x20) >> 4)];
+					tile[(7 - i) * 8 + 3] = colors[(int)((b1 & 0x10) >> 4) + (int)((b2 & 0x10) >> 3)];
+					tile[(7 - i) * 8 + 4] = colors[(int)((b1 & 0x08) >> 3) + (int)((b2 & 0x08) >> 2)];
+					tile[(7 - i) * 8 + 5] = colors[(int)((b1 & 0x04) >> 2) + (int)((b2 & 0x04) >> 1)];
+					tile[(7 - i) * 8 + 6] = colors[(int)((b1 & 0x02) >> 1) + (int)((b2 & 0x02))];
+					tile[(7 - i) * 8 + 7] = colors[(int)((b1 & 0x01)) + (int)((b2 & 0x01) << 1)];
 				}
 				tiles[(uint)n] = tile;
 			}
