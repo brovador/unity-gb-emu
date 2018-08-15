@@ -179,28 +179,39 @@ namespace brovador.GBEmulator {
 			var lineX = SCX;
 			var bufferY = (SCREEN_PIXELS_WIDTH * SCREEN_PIXELS_HEIGHT - (LY * SCREEN_PIXELS_WIDTH)) - SCREEN_PIXELS_WIDTH;
 
+			var tileMapX = 0;
+			var tileMapY = 0;
+			var tileX = 0;
+			var tileY = 0;
+			var nTile = 0;
+			int[] tile = null;
+
 			for (int i = 0; i < SCREEN_PIXELS_WIDTH; i++) {
 
-				lineX++;
+				if (i == 0 || lineX % 8 == 0) {
+					
+					tileMapY = (int)((lineY / 8) % 32);
+					tileMapX = (int)((lineX / 8) % 32);
 
-				var tileMapY = (int)((lineY / 8) % 32);
-				var tileMapX = (int)((lineX / 8) % 32);
-
-				var tileY = (int)(lineY % 8);
-				var tileX = (int)(lineX % 8);
-
-				int nTile = mmu.Read((ushort)(tileMapAddressOffset + (tileMapY * 32) + tileMapX));
-				if (LCDC_BGWindowTileData == 0) {
-					if (nTile > 127) {
-						nTile -= 0x100;
+					nTile = mmu.Read((ushort)(tileMapAddressOffset + (tileMapY * 32) + tileMapX));
+					if (LCDC_BGWindowTileData == 0) {
+						if (nTile > 127) {
+							nTile -= 0x100;
+						}
+						nTile = 256 + nTile;
 					}
-					nTile = 256 + nTile;
+
+					if (!tiles.ContainsKey((uint)(nTile))) {
+						continue;
+					}
+					tile = tiles[(uint)nTile];
 				}
 
-				if (tiles.ContainsKey((uint)nTile)) {
-					var tile = tiles[(uint)nTile];
-					buffer[bufferY + i] = colors[tile[tileY * 8 + tileX]];
-				}
+				tileY = (int)(lineY % 8);
+				tileX = (int)(lineX % 8);
+
+				buffer[bufferY + i] = colors[tile[tileY * 8 + tileX]];
+				lineX++;
 			}
 		}
 

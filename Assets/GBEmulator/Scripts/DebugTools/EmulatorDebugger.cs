@@ -196,7 +196,7 @@ namespace brovador.GBEmulator.Debugger {
 					GUI.color = Color.green;
 				}
 
-				GUILayout.Label(string.Format("FPS: {0:0.00}", 1.0f / emu.LastFrameTime));
+				GUILayout.Label(string.Format("FPS: {0:0.0}", (int)(1.0f / emu.LastFrameTime)));
 				GUILayout.Space(10);
 				GUILayout.Label(string.Format("OP: {0:X4} | {1:X2} | {2}", 
 					emu.cpu.registers.PC, 
