@@ -17,6 +17,7 @@ namespace brovador.GBEmulator {
 		public const float FPS = 59.7f;
 		public bool skipBios;
 		public TextAsset rom;
+		public Material outputMaterial;
 
 		Coroutine emulatorStepCoroutine;
 		public bool isOn { get; private set; }
@@ -33,6 +34,10 @@ namespace brovador.GBEmulator {
 			cpu = new CPU(mmu);
 			gpu = new GPU(mmu);
 			timer = new Timer(mmu);
+
+			if (outputMaterial != null) {
+				outputMaterial.SetTexture("_MainTex", gpu.screenTexture);
+			}
 		}
 
 		#region Public

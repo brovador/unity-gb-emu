@@ -47,6 +47,8 @@ namespace brovador.GBEmulator.Debugger {
 				ShowBGMap();
 			} else if (selectedView == 1) {
 				ShowTiles();
+			} else if (selectedView == 2) {
+				ShowScreen();
 			}
 		}
 
@@ -57,6 +59,16 @@ namespace brovador.GBEmulator.Debugger {
 		}
 
 
+		void ShowScreen()
+		{
+			DrawTexture(emu.gpu.screenTexture, 
+				GPU.SCREEN_PIXELS_WIDTH, 
+				GPU.SCREEN_PIXELS_HEIGHT,
+				2
+			);
+		}
+
+
 		void ShowBGMap()
 		{
 			UpdateTilesDict();
@@ -64,12 +76,12 @@ namespace brovador.GBEmulator.Debugger {
 				vramTexture = new Texture2D(32 * 8, 32 * 8, TextureFormat.ARGB32, false);
 				vramTexture.filterMode = FilterMode.Point;
 			}
-			var addr = 0x9800;
+			var addr = emu.gpu.LCDC_BGTileMap == 0 ? 0x9800 : 0x9C00;
 			for (int i = 0; i < 32; i++) {
 				for (int j = 0; j < 32; j++) {
 
 					int n = (int)emu.mmu.Read((ushort)(addr + i * 32 + j));
-					if (emu.gpu.SelectedTileDataBG == 0) {
+					if (emu.gpu.LCDC_BGWindowTileData == 0) {
 						if (n > 127) {
 							n -= 0x100;
 						}
@@ -103,16 +115,21 @@ namespace brovador.GBEmulator.Debugger {
 		}
 
 
-		void DrawTexture(Texture2D t, int size)
+		void DrawTexture(Texture2D t, int sizeW, int sizeH = 0, int textureScale = 8)
 		{
-			int textureScale = 8;
-			size = size * textureScale;
+			if (sizeH == 0) {
+				sizeH = sizeW;
+			}
+
+			sizeW = sizeW * textureScale;
+			sizeH = sizeH * textureScale;
+
 
 			GUIStyle buttonStyle = new GUIStyle(GUI.skin.label);
 			buttonStyle.margin = new RectOffset(0, 0, 0, 0);
 
 			GUILayoutOption[] options = {
-				GUILayout.Width(size), GUILayout.Height(size)
+				GUILayout.Width(sizeW), GUILayout.Height(sizeH)
 			};
 
 			GUILayout.Box("", buttonStyle, options);
