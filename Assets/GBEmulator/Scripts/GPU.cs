@@ -91,9 +91,11 @@ namespace brovador.GBEmulator {
 		public GPU(MMU mmu) 
 		{
 			this.mmu = mmu;
-			this.mmu.OnMemoryAccess += (MMU arg1, ushort arg2, bool arg3) => {
-				if (arg3 && arg2 >= 0x8000 && arg2 <= 0x97FF) {
-					UpdateTile(arg2);
+			this.mmu.OnMemoryAccess += (MMU m, ushort addr, bool isWrite) => {
+				if (isWrite && addr >= 0x8000 && addr <= 0x97FF) {
+					UpdateTile(addr);
+				} else if (isWrite && addr == 0xFF46) {
+					OAMTransfer();
 				}
 			};
 
@@ -173,45 +175,91 @@ namespace brovador.GBEmulator {
 		void DrawScanline()
 		{
 			//VRAM size is 32x32 tiles, 1 byte per tile
-			var tileMapAddressOffset = LCDC_BGTileMap == 0 ? 0x9800 : 0x9C00;
-
 			var lineY = LY + SCY;
 			var lineX = SCX;
 			var bufferY = (SCREEN_PIXELS_WIDTH * SCREEN_PIXELS_HEIGHT - (LY * SCREEN_PIXELS_WIDTH)) - SCREEN_PIXELS_WIDTH;
 
-			var tileMapX = 0;
-			var tileMapY = 0;
-			var tileX = 0;
-			var tileY = 0;
-			var nTile = 0;
-			int[] tile = null;
+			if (LCDC_BGWindowDisplay) {
+				var tileMapAddressOffset = LCDC_BGTileMap == 0 ? 0x9800 : 0x9C00;
+				var tileMapX = 0;
+				var tileMapY = 0;
+				var tileX = 0;
+				var tileY = 0;
+				var nTile = 0;
+				int[] tile = null;
 
-			for (int i = 0; i < SCREEN_PIXELS_WIDTH; i++) {
-
-				if (i == 0 || lineX % 8 == 0) {
+				for (int i = 0; i < SCREEN_PIXELS_WIDTH; i++) {
+					if (i == 0 || lineX % 8 == 0) {
 					
-					tileMapY = (int)((lineY / 8) % 32);
-					tileMapX = (int)((lineX / 8) % 32);
+						tileMapY = (int)((lineY / 8) % 32);
+						tileMapX = (int)((lineX / 8) % 32);
 
-					nTile = mmu.Read((ushort)(tileMapAddressOffset + (tileMapY * 32) + tileMapX));
-					if (LCDC_BGWindowTileData == 0) {
-						if (nTile > 127) {
-							nTile -= 0x100;
+						nTile = mmu.Read((ushort)(tileMapAddressOffset + (tileMapY * 32) + tileMapX));
+						if (LCDC_BGWindowTileData == 0) {
+							if (nTile > 127) {
+								nTile -= 0x100;
+							}
+							nTile = 256 + nTile;
 						}
-						nTile = 256 + nTile;
+
+						if (!tiles.ContainsKey((uint)(nTile))) {
+							continue;
+						}
+						tile = tiles[(uint)nTile];
 					}
 
-					if (!tiles.ContainsKey((uint)(nTile))) {
-						continue;
-					}
-					tile = tiles[(uint)nTile];
+					tileY = (int)(lineY % 8);
+					tileX = (int)(lineX % 8);
+
+					buffer[bufferY + i] = colors[tile[tileY * 8 + tileX]];
+					lineX++;
 				}
+			}
 
-				tileY = (int)(lineY % 8);
-				tileX = (int)(lineX % 8);
+			if (LCDC_SpriteDisplay) {
+				var oamAddress = 0xFE00;
+				int spriteX = 0;
+				int spriteY = 0;
+				byte n = 0;
+				byte flags = 0;
+				int palette = 0;
+				bool xFlip = false;
+				bool yFlip = false;
+				int priority = 0;
+				int spriteRow = 0;
+				int pixelColor = 0;
 
-				buffer[bufferY + i] = colors[tile[tileY * 8 + tileX]];
-				lineX++;
+				for (int i = 0; i < 40; i++) {
+					spriteY = mmu.Read((ushort)(oamAddress + i * 4)) - 16;
+					spriteX = mmu.Read((ushort)(oamAddress + i * 4 + 1)) - 8;
+					n = mmu.Read((ushort)(oamAddress + i * 4 + 2));
+					flags = mmu.Read((ushort)(oamAddress + i * 4 + 3));
+
+					if (spriteY <= LY && spriteY + 8 > LY) {
+
+						palette = (flags & 0x10) == 0 ? 0 : 1;
+						xFlip = (flags & 0x20) == 0 ? false : true;
+						yFlip = (flags & 0x40) == 0 ? false : true;
+						priority = (flags & 0x80) == 0 ? 0 : 1;
+
+						//TODO: check y-flip
+
+						spriteRow = (LY - spriteY);
+
+						for (int x = 0; x < 8; x++) {
+							pixelColor = tiles[(uint)n][spriteRow * 8 + x];
+							if (((spriteX + x) >= 0) && ((spriteX + x) < SCREEN_PIXELS_WIDTH)
+								//&& pixelColor != 0
+								//&& (priority != 0 || buffer[bufferY + spriteX + x] == colors[0])
+							) {
+
+								//TODO: check x-flip
+								buffer[bufferY + spriteX + x] = colors[pixelColor];
+							}
+						}
+					}
+
+				}
 			}
 		}
 
@@ -253,6 +301,14 @@ namespace brovador.GBEmulator {
 			tile[tileRow * 8 + 5] = (int)((b1 & 0x04) >> 2) + (int)((b2 & 0x04) >> 1);
 			tile[tileRow * 8 + 6] = (int)((b1 & 0x02) >> 1) + (int)((b2 & 0x02));
 			tile[tileRow * 8 + 7] = (int)((b1 & 0x01)) + (int)((b2 & 0x01) << 1);
+		}
+
+		void OAMTransfer()
+		{
+			var addr = (ushort)(DMA << 8);
+			for (int i = 0; i < 40; i++) {
+				mmu.Write((ushort)(0xFE00 + i), mmu.Read((ushort)(addr + i)));
+			}
 		}
 	}
 }
