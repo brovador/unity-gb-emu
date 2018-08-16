@@ -167,7 +167,7 @@ namespace brovador.GBEmulator.Debugger {
 		#endregion
 
 
-		public string OperationNameAtAddress(UInt16 addr)
+		public string OperationNameAtAddress(ushort addr)
 		{
 			byte op = emu.mmu.Read(addr);
 			var code = opCodes[op];
@@ -175,12 +175,12 @@ namespace brovador.GBEmulator.Debugger {
 			if (op != 0xCB) {
 				int parameters = opCodeBytes[op];
 				if (parameters == 2) {
-					code = string.Format("{0} 0x{1:X2}", code, emu.mmu.Read((UInt16)(addr + 1)));
+					code = string.Format("{0} 0x{1:X2}", code, emu.mmu.Read((ushort)(addr + 1)));
 				} else if (parameters == 3) {
-					code = string.Format("{0} 0x{1:X4}", code, emu.mmu.ReadW((UInt16)(addr + 1)));
+					code = string.Format("{0} 0x{1:X4}", code, emu.mmu.ReadW((ushort)(addr + 1)));
 				}
 			} else {
-				op = emu.mmu.Read((UInt16)(addr + 1));
+				op = emu.mmu.Read((ushort)(addr + 1));
 				code = opCodesCB[op];
 			}
 			return code;
@@ -303,7 +303,7 @@ namespace brovador.GBEmulator.Debugger {
 				addrToCheck = GUILayout.TextField(addrToCheck);
 				if (GUILayout.Button("Check Address")) {
 					if (addrToCheck != string.Empty) {
-						UInt16 dir = (UInt16)(System.Convert.ToInt16(addrToCheck, 16));
+						ushort dir = (ushort)(System.Convert.ToInt16(addrToCheck, 16));
 						resultAddr = string.Format("Value: 0x{0:X2}", emu.mmu.Read(dir));
 					}
 				}
