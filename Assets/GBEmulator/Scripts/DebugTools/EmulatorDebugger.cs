@@ -119,19 +119,19 @@ namespace brovador.GBEmulator.Debugger {
 
 		void Emu_OnEmulatorOff (Emulator obj)
 		{
-			emu.mmu.OnMemoryAccess -= MMUOnMemoryAccess;
+			emu.mmu.OnMemoryWritten -= MMUOnMemoryAccess;
 		}
 
 
 		void Emu_OnEmulatorOn (Emulator obj)
 		{
-			emu.mmu.OnMemoryAccess += MMUOnMemoryAccess;
+			emu.mmu.OnMemoryWritten += MMUOnMemoryAccess;
 		}
 
 
-		void MMUOnMemoryAccess (MMU mmu, ushort addr, bool isWrite)
+		void MMUOnMemoryAccess (MMU mmu, ushort addr)
 		{
-			if (enableBreakPoints && isWrite) {
+			if (enableBreakPoints) {
 				for (int i = 0; i < memoryBreakPoints.Count; i++) {
 					if (memoryBreakPoints[i].IsActivated(addr, emu)) {
 						Debug.Log(string.Format("<color=blue>PAUSED on memory access: {0:X4}</color>", addr));

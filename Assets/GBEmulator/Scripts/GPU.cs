@@ -91,10 +91,10 @@ namespace brovador.GBEmulator {
 		public GPU(MMU mmu) 
 		{
 			this.mmu = mmu;
-			this.mmu.OnMemoryAccess += (MMU m, ushort addr, bool isWrite) => {
-				if (isWrite && addr >= 0x8000 && addr <= 0x97FF) {
+			this.mmu.OnMemoryWritten += (MMU m, ushort addr) => {
+				if (addr >= 0x8000 && addr <= 0x97FF) {
 					UpdateTile(addr);
-				} else if (isWrite && addr == 0xFF46) {
+				} else if (addr == 0xFF46) {
 					OAMTransfer();
 				}
 			};
@@ -234,6 +234,10 @@ namespace brovador.GBEmulator {
 					spriteX = mmu.Read((ushort)(oamAddress + i * 4 + 1)) - 8;
 					n = mmu.Read((ushort)(oamAddress + i * 4 + 2));
 					flags = mmu.Read((ushort)(oamAddress + i * 4 + 3));
+
+					if (!tiles.ContainsKey((uint)n)) {
+						continue;
+					}
 
 					if (spriteY <= LY && spriteY + 8 > LY) {
 
