@@ -17,6 +17,7 @@ namespace brovador.GBEmulator {
 		public const float FPS = 59.7f;
 		public bool skipBios;
 		public TextAsset rom;
+		public Material outputMaterial;
 
 		Coroutine emulatorStepCoroutine;
 		public bool isOn { get; private set; }
@@ -33,6 +34,10 @@ namespace brovador.GBEmulator {
 			cpu = new CPU(mmu);
 			gpu = new GPU(mmu);
 			timer = new Timer(mmu);
+
+			if (outputMaterial != null) {
+				outputMaterial.SetTexture("_MainTex", gpu.screenTexture);
+			}
 		}
 
 		#region Public
@@ -105,44 +110,44 @@ namespace brovador.GBEmulator {
 			}
 			
 			//IO default values
-			mmu.IOWrite((UInt16)0xFF01, (byte)0x00);
-			mmu.IOWrite((UInt16)0xFF02, (byte)0x7E);
-			mmu.IOWrite((UInt16)0xFF04, (byte)0xAB);
-			mmu.IOWrite((UInt16)0xFF05, (byte)0x00);
-			mmu.IOWrite((UInt16)0xFF06, (byte)0x00);
-			mmu.IOWrite((UInt16)0xFF07, (byte)0x00);
-			mmu.IOWrite((UInt16)0xFF0F, (byte)0xE1);
+			mmu.IOWrite((ushort)0xFF01, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF02, (byte)0x7E);
+			mmu.IOWrite((ushort)0xFF04, (byte)0xAB);
+			mmu.IOWrite((ushort)0xFF05, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF06, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF07, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF0F, (byte)0xE1);
 
-			mmu.IOWrite((UInt16)0xFF10, (byte)0x80);
-			mmu.IOWrite((UInt16)0xFF11, (byte)0xBF);
-			mmu.IOWrite((UInt16)0xFF12, (byte)0xF3);
-			mmu.IOWrite((UInt16)0xFF14, (byte)0xBF);
-			mmu.IOWrite((UInt16)0xFF16, (byte)0x3F);
-			mmu.IOWrite((UInt16)0xFF17, (byte)0x00);
-			mmu.IOWrite((UInt16)0xFF19, (byte)0xBF);
-			mmu.IOWrite((UInt16)0xFF1A, (byte)0x7F);
-			mmu.IOWrite((UInt16)0xFF1B, (byte)0xFF);
-			mmu.IOWrite((UInt16)0xFF1C, (byte)0x9F);
-			mmu.IOWrite((UInt16)0xFF1E, (byte)0xBF);
+			mmu.IOWrite((ushort)0xFF10, (byte)0x80);
+			mmu.IOWrite((ushort)0xFF11, (byte)0xBF);
+			mmu.IOWrite((ushort)0xFF12, (byte)0xF3);
+			mmu.IOWrite((ushort)0xFF14, (byte)0xBF);
+			mmu.IOWrite((ushort)0xFF16, (byte)0x3F);
+			mmu.IOWrite((ushort)0xFF17, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF19, (byte)0xBF);
+			mmu.IOWrite((ushort)0xFF1A, (byte)0x7F);
+			mmu.IOWrite((ushort)0xFF1B, (byte)0xFF);
+			mmu.IOWrite((ushort)0xFF1C, (byte)0x9F);
+			mmu.IOWrite((ushort)0xFF1E, (byte)0xBF);
 
-			mmu.IOWrite((UInt16)0xFF21, (byte)0x00);
-			mmu.IOWrite((UInt16)0xFF22, (byte)0x00);
-			mmu.IOWrite((UInt16)0xFF23, (byte)0xBF);
-			mmu.IOWrite((UInt16)0xFF24, (byte)0x77);
-			mmu.IOWrite((UInt16)0xFF25, (byte)0xF3);
-			mmu.IOWrite((UInt16)0xFF26, (byte)0xF1);
+			mmu.IOWrite((ushort)0xFF21, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF22, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF23, (byte)0xBF);
+			mmu.IOWrite((ushort)0xFF24, (byte)0x77);
+			mmu.IOWrite((ushort)0xFF25, (byte)0xF3);
+			mmu.IOWrite((ushort)0xFF26, (byte)0xF1);
 
-			mmu.IOWrite((UInt16)0xFF40, (byte)0x91);
-			mmu.IOWrite((UInt16)0xFF41, (byte)0x85);
-			mmu.IOWrite((UInt16)0xFF42, (byte)0x00);
-			mmu.IOWrite((UInt16)0xFF43, (byte)0x00);
-			mmu.IOWrite((UInt16)0xFF44, (byte)0x00);
-			mmu.IOWrite((UInt16)0xFF45, (byte)0x00);
-			mmu.IOWrite((UInt16)0xFF47, (byte)0xFC);
-			mmu.IOWrite((UInt16)0xFF4A, (byte)0x00);
-			mmu.IOWrite((UInt16)0xFF4B, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF40, (byte)0x91);
+			mmu.IOWrite((ushort)0xFF41, (byte)0x85);
+			mmu.IOWrite((ushort)0xFF42, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF43, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF44, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF45, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF47, (byte)0xFC);
+			mmu.IOWrite((ushort)0xFF4A, (byte)0x00);
+			mmu.IOWrite((ushort)0xFF4B, (byte)0x00);
 
-			mmu.Write((UInt16)0xFFFF, (byte)0x00);
+			mmu.Write((ushort)0xFFFF, (byte)0x00);
 		}
 
 
