@@ -27,6 +27,7 @@ namespace brovador.GBEmulator {
 		[HideInInspector] public MMU mmu;
 		[HideInInspector] public GPU gpu;
 		[HideInInspector] public Timer timer;
+		[HideInInspector] public Joypad joypad;
 
 		void Init()
 		{
@@ -34,11 +35,21 @@ namespace brovador.GBEmulator {
 			cpu = new CPU(mmu);
 			gpu = new GPU(mmu);
 			timer = new Timer(mmu);
+			joypad = new Joypad(mmu);
 
 			if (outputMaterial != null) {
 				outputMaterial.SetTexture("_MainTex", gpu.screenTexture);
 			}
 		}
+
+
+		void Update()
+		{
+			if (isOn) {
+				CheckKeys();		
+			}
+		}
+
 
 		#region Public
 
@@ -104,11 +115,6 @@ namespace brovador.GBEmulator {
 			cpu.registers.SP = 0xFFFE;
 			cpu.registers.PC = 0x0100;
 
-			//in bgb all IO starts in general with FF
-			for (int i = 0xFF00; i < 0xFF4C; i++) {
-				mmu.IOWrite((ushort)i, (byte)0xFF);
-			}
-			
 			//IO default values
 			mmu.IOWrite((ushort)0xFF01, (byte)0x00);
 			mmu.IOWrite((ushort)0xFF02, (byte)0x7E);
@@ -189,5 +195,30 @@ namespace brovador.GBEmulator {
 		}
 
 		#endregion
+
+		Dictionary<KeyCode, Joypad.Button> keyMap;
+
+		void CheckKeys()
+		{
+			if (keyMap == null) {
+				keyMap = new Dictionary<KeyCode, Joypad.Button>();
+				keyMap[KeyCode.LeftArrow] = Joypad.Button.Left;
+				keyMap[KeyCode.RightArrow] = Joypad.Button.Right;
+				keyMap[KeyCode.UpArrow] = Joypad.Button.Up;
+				keyMap[KeyCode.DownArrow] = Joypad.Button.Down;
+				keyMap[KeyCode.A] = Joypad.Button.A;
+				keyMap[KeyCode.S] = Joypad.Button.B;
+				keyMap[KeyCode.Z] = Joypad.Button.Start;
+				keyMap[KeyCode.X] = Joypad.Button.Select;
+			}
+
+			foreach (var pair in keyMap) {
+				if (Input.GetKeyDown(pair.Key)) {
+					joypad.SetKey(pair.Value, true);	
+				} else if (Input.GetKeyUp(pair.Key)) {
+					joypad.SetKey(pair.Value, false);	
+				}
+			}
+		}
 	}
 }
