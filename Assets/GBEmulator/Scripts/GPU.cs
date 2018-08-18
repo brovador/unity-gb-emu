@@ -240,7 +240,7 @@ namespace brovador.GBEmulator {
 					}
 
 					if (spriteY <= LY && spriteY + 8 > LY) {
-
+						
 						palette = (flags & 0x10) == 0 ? 0 : 1;
 						xFlip = (flags & 0x20) == 0 ? false : true;
 						yFlip = (flags & 0x40) == 0 ? false : true;
@@ -256,7 +256,6 @@ namespace brovador.GBEmulator {
 								//&& pixelColor != 0
 								//&& (priority != 0 || buffer[bufferY + spriteX + x] == colors[0])
 							) {
-
 								//TODO: check x-flip
 								buffer[bufferY + spriteX + x] = colors[pixelColor];
 							}
@@ -310,7 +309,7 @@ namespace brovador.GBEmulator {
 		void OAMTransfer()
 		{
 			var addr = (ushort)(DMA << 8);
-			for (int i = 0; i < 40; i++) {
+			for (int i = 0; i < 40 * 4; i++) {
 				mmu.Write((ushort)(0xFE00 + i), mmu.Read((ushort)(addr + i)));
 			}
 		}
