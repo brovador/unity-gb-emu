@@ -84,15 +84,16 @@ namespace brovador.GBEmulator {
 					DIV++;
 				}
 
-				if (IsRunning) {
-					//1/x Increment counter
-					if (clock >= (int)TimerSpeed) {
-						clock = 0;
-						TIMA++;
-						if (TIMA == 0) {
-							mmu.SetInterrupt(MMU.InterruptType.TimerOverflow);
-							TIMA = TMA;
-						}
+			}
+
+			if (IsRunning) {
+				//1/x Increment counter
+				if (clock >= (int)TimerSpeed) {
+					clock = 0;
+					TIMA++;
+					if (TIMA == 0) {
+						mmu.SetInterrupt(MMU.InterruptType.TimerOverflow);
+						TIMA = TMA;
 					}
 				}
 			}
