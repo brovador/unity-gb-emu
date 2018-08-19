@@ -10,7 +10,7 @@ namespace brovador.GBEmulator {
 		public const int SCREEN_PIXELS_HEIGHT = 144;
 
 		const int HORIZONAL_BLANK_CYCLES = 204;
-		const int VERTICAL_BLANK_CYCLES = 4560;
+		const int VERTICAL_BLANK_CYCLES = 456;
 		const int SCANLINE_OAM_CYCLES = 80;
 		const int SCANLINE_VRAM_CYCLES = 172;
 
@@ -133,9 +133,8 @@ namespace brovador.GBEmulator {
 			
 			//VBlank
 			case GPUMode.VBlank:
-				uint t = (uint)(SCANLINE_OAM_CYCLES + SCANLINE_VRAM_CYCLES + HORIZONAL_BLANK_CYCLES);
-				if (clock >= t) {
-					clock -= t;
+				if (clock >= VERTICAL_BLANK_CYCLES) {
+					clock -= VERTICAL_BLANK_CYCLES;
 					LY++;
 
 					if (LY > 153) {
@@ -253,7 +252,7 @@ namespace brovador.GBEmulator {
 						for (int x = 0; x < 8; x++) {
 							pixelColor = tiles[(uint)n][spriteRow * 8 + x];
 							if (((spriteX + x) >= 0) && ((spriteX + x) < SCREEN_PIXELS_WIDTH)
-								//&& pixelColor != 0
+								&& pixelColor != 0
 								//&& (priority != 0 || buffer[bufferY + spriteX + x] == colors[0])
 							) {
 								//TODO: check x-flip
