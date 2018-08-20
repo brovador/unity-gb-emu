@@ -48,8 +48,6 @@ namespace brovador.GBEmulator {
 			directions |= (byte)(states[Button.Down] ? 0x08 : 0x00);
 			directions = (byte)~directions;
 
-			//0 is pressed, so we invert the bits
-			//before writing in memory
 			mmu.WriteJoypadInfo(
 				(byte)((buttons) & 0x0F), 
 				(byte)((directions) & 0xF)
