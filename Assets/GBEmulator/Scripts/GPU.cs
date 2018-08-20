@@ -46,7 +46,7 @@ namespace brovador.GBEmulator {
 		#warning STAT coincicende flag not set
 		GPUMode STAT_Mode {
 			get { return (GPUMode)(mmu.Read((ushort)0xFF41) & 0x03); }
-			set { mmu.IOWrite(0xFF41, (byte)((mmu.Read(0xFF41) & ~0x03) + (byte)value)); }
+			set { mmu.Write(0xFF41, (byte)((mmu.Read(0xFF41) & ~0x03) + (byte)value)); }
 		}
 
 		//FF42(SCY)
@@ -58,7 +58,7 @@ namespace brovador.GBEmulator {
 		//FF44(LY)
 		byte LY { 
 			get { return mmu.Read(0xFF44); } 
-			set { mmu.IOWrite(0xFF44, value); } 
+			set { mmu.Write(0xFF44, value, true); } 
 		}
 
 		//FF45(LYC)

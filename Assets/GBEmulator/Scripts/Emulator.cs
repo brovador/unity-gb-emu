@@ -116,42 +116,42 @@ namespace brovador.GBEmulator {
 			cpu.registers.PC = 0x0100;
 
 			//IO default values
-			mmu.IOWrite((ushort)0xFF01, (byte)0x00);
-			mmu.IOWrite((ushort)0xFF02, (byte)0x7E);
-			mmu.IOWrite((ushort)0xFF04, (byte)0xAB);
-			mmu.IOWrite((ushort)0xFF05, (byte)0x00);
-			mmu.IOWrite((ushort)0xFF06, (byte)0x00);
-			mmu.IOWrite((ushort)0xFF07, (byte)0x00);
-			mmu.IOWrite((ushort)0xFF0F, (byte)0xE1);
+			mmu.Write((ushort)0xFF01, (byte)0x00);
+			mmu.Write((ushort)0xFF02, (byte)0x7E);
+			mmu.Write((ushort)0xFF04, (byte)0xAB);
+			mmu.Write((ushort)0xFF05, (byte)0x00);
+			mmu.Write((ushort)0xFF06, (byte)0x00);
+			mmu.Write((ushort)0xFF07, (byte)0x00);
+			mmu.Write((ushort)0xFF0F, (byte)0xE1);
 
-			mmu.IOWrite((ushort)0xFF10, (byte)0x80);
-			mmu.IOWrite((ushort)0xFF11, (byte)0xBF);
-			mmu.IOWrite((ushort)0xFF12, (byte)0xF3);
-			mmu.IOWrite((ushort)0xFF14, (byte)0xBF);
-			mmu.IOWrite((ushort)0xFF16, (byte)0x3F);
-			mmu.IOWrite((ushort)0xFF17, (byte)0x00);
-			mmu.IOWrite((ushort)0xFF19, (byte)0xBF);
-			mmu.IOWrite((ushort)0xFF1A, (byte)0x7F);
-			mmu.IOWrite((ushort)0xFF1B, (byte)0xFF);
-			mmu.IOWrite((ushort)0xFF1C, (byte)0x9F);
-			mmu.IOWrite((ushort)0xFF1E, (byte)0xBF);
+			mmu.Write((ushort)0xFF10, (byte)0x80);
+			mmu.Write((ushort)0xFF11, (byte)0xBF);
+			mmu.Write((ushort)0xFF12, (byte)0xF3);
+			mmu.Write((ushort)0xFF14, (byte)0xBF);
+			mmu.Write((ushort)0xFF16, (byte)0x3F);
+			mmu.Write((ushort)0xFF17, (byte)0x00);
+			mmu.Write((ushort)0xFF19, (byte)0xBF);
+			mmu.Write((ushort)0xFF1A, (byte)0x7F);
+			mmu.Write((ushort)0xFF1B, (byte)0xFF);
+			mmu.Write((ushort)0xFF1C, (byte)0x9F);
+			mmu.Write((ushort)0xFF1E, (byte)0xBF);
 
-			mmu.IOWrite((ushort)0xFF21, (byte)0x00);
-			mmu.IOWrite((ushort)0xFF22, (byte)0x00);
-			mmu.IOWrite((ushort)0xFF23, (byte)0xBF);
-			mmu.IOWrite((ushort)0xFF24, (byte)0x77);
-			mmu.IOWrite((ushort)0xFF25, (byte)0xF3);
-			mmu.IOWrite((ushort)0xFF26, (byte)0xF1);
+			mmu.Write((ushort)0xFF21, (byte)0x00);
+			mmu.Write((ushort)0xFF22, (byte)0x00);
+			mmu.Write((ushort)0xFF23, (byte)0xBF);
+			mmu.Write((ushort)0xFF24, (byte)0x77);
+			mmu.Write((ushort)0xFF25, (byte)0xF3);
+			mmu.Write((ushort)0xFF26, (byte)0xF1);
 
-			mmu.IOWrite((ushort)0xFF40, (byte)0x91);
-			mmu.IOWrite((ushort)0xFF41, (byte)0x85);
-			mmu.IOWrite((ushort)0xFF42, (byte)0x00);
-			mmu.IOWrite((ushort)0xFF43, (byte)0x00);
-			mmu.IOWrite((ushort)0xFF44, (byte)0x00);
-			mmu.IOWrite((ushort)0xFF45, (byte)0x00);
-			mmu.IOWrite((ushort)0xFF47, (byte)0xFC);
-			mmu.IOWrite((ushort)0xFF4A, (byte)0x00);
-			mmu.IOWrite((ushort)0xFF4B, (byte)0x00);
+			mmu.Write((ushort)0xFF40, (byte)0x91);
+			mmu.Write((ushort)0xFF41, (byte)0x85);
+			mmu.Write((ushort)0xFF42, (byte)0x00);
+			mmu.Write((ushort)0xFF43, (byte)0x00);
+			mmu.Write((ushort)0xFF44, (byte)0x00);
+			mmu.Write((ushort)0xFF45, (byte)0x00);
+			mmu.Write((ushort)0xFF47, (byte)0xFC);
+			mmu.Write((ushort)0xFF4A, (byte)0x00);
+			mmu.Write((ushort)0xFF4B, (byte)0x00);
 
 			mmu.Write((ushort)0xFFFF, (byte)0x00);
 		}
