@@ -174,9 +174,10 @@ namespace brovador.GBEmulator {
 		void DrawScanline()
 		{
 			//VRAM size is 32x32 tiles, 1 byte per tile
-			var lineY = LY + SCY;
+			byte ly = LY;
+			var lineY = ly + SCY;
 			var lineX = SCX;
-			var bufferY = (SCREEN_PIXELS_WIDTH * SCREEN_PIXELS_HEIGHT - (LY * SCREEN_PIXELS_WIDTH)) - SCREEN_PIXELS_WIDTH;
+			var bufferY = (SCREEN_PIXELS_WIDTH * SCREEN_PIXELS_HEIGHT - (ly * SCREEN_PIXELS_WIDTH)) - SCREEN_PIXELS_WIDTH;
 
 			if (LCDC_BGWindowDisplay) {
 				var tileMapAddressOffset = LCDC_BGTileMap == 0 ? 0x9800 : 0x9C00;
@@ -188,12 +189,12 @@ namespace brovador.GBEmulator {
 				int[] tile = null;
 
 				for (int i = 0; i < SCREEN_PIXELS_WIDTH; i++) {
-					if (i == 0 || lineX % 8 == 0) {
+					if (i == 0 || (lineX & 7) == 0) {
 					
-						tileMapY = (int)((lineY / 8) % 32);
-						tileMapX = (int)((lineX / 8) % 32);
+						tileMapY = (int)((lineY >> 3) & 31);
+						tileMapX = (int)((lineX >> 3) & 31);
 
-						nTile = mmu.Read((ushort)(tileMapAddressOffset + (tileMapY * 32) + tileMapX));
+						nTile = mmu.Read((ushort)(tileMapAddressOffset + (tileMapY << 5) + tileMapX));
 						if (LCDC_BGWindowTileData == 0) {
 							if (nTile > 127) {
 								nTile -= 0x100;
@@ -207,10 +208,10 @@ namespace brovador.GBEmulator {
 						tile = tiles[(uint)nTile];
 					}
 
-					tileY = (int)(lineY % 8);
-					tileX = (int)(lineX % 8);
+					tileY = (int)(lineY & 7);
+					tileX = (int)(lineX & 7);
 
-					buffer[bufferY + i] = colors[tile[tileY * 8 + tileX]];
+					buffer[bufferY + i] = colors[tile[(tileY << 3) + tileX]];
 					lineX++;
 				}
 			}
@@ -238,7 +239,7 @@ namespace brovador.GBEmulator {
 						continue;
 					}
 
-					if (spriteY <= LY && spriteY + 8 > LY) {
+					if (spriteY <= ly && spriteY + 8 > ly) {
 						
 						palette = (flags & 0x10) == 0 ? 0 : 1;
 						xFlip = (flags & 0x20) == 0 ? false : true;
@@ -247,7 +248,7 @@ namespace brovador.GBEmulator {
 
 						//TODO: check y-flip
 
-						spriteRow = (LY - spriteY);
+						spriteRow = (ly - spriteY);
 
 						for (int x = 0; x < 8; x++) {
 							pixelColor = tiles[(uint)n][spriteRow * 8 + x];
