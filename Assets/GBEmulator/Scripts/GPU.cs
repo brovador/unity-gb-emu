@@ -50,10 +50,10 @@ namespace brovador.GBEmulator {
 		}
 
 		//FF42(SCY)
-		byte SCY { get { return (byte)(mmu.Read(0xFF42) & 0x0F); } }
+		byte SCY { get { return mmu.Read(0xFF42); } }
 
 		//FF43(SCX)
-		byte SCX { get { return (byte)(mmu.Read(0xFF43) & 0x0F); } }
+		byte SCX { get { return mmu.Read(0xFF43); } }
 
 		//FF44(LY)
 		byte LY { 
