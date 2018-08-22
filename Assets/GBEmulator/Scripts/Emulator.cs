@@ -175,10 +175,10 @@ namespace brovador.GBEmulator {
 		public float LastFrameTime { get; private set; }
 		IEnumerator EmulatorCoroutine()
 		{
-			var cyclesPerSecond = cpu.clockSpeed / FPS;
+			var cyclesPerFrame = cpu.clockSpeed / FPS;
 
 			while (true) {
-				var fTime = cpu.timers.t + cyclesPerSecond;
+				var fTime = cpu.timers.t + cyclesPerFrame;
 				var fStart = Time.realtimeSinceStartup;
 				while (cpu.timers.t < fTime) {
 					if (OnEmulatorStep != null) {
