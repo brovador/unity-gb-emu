@@ -208,8 +208,8 @@ namespace brovador.GBEmulator {
 				keyMap[KeyCode.DownArrow] = Joypad.Button.Down;
 				keyMap[KeyCode.A] = Joypad.Button.A;
 				keyMap[KeyCode.S] = Joypad.Button.B;
-				keyMap[KeyCode.Z] = Joypad.Button.Start;
-				keyMap[KeyCode.X] = Joypad.Button.Select;
+				keyMap[KeyCode.Return] = Joypad.Button.Start;
+				keyMap[KeyCode.Delete] = Joypad.Button.Select;
 			}
 
 			foreach (var pair in keyMap) {
