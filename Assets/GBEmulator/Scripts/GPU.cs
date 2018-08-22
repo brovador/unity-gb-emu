@@ -258,7 +258,7 @@ namespace brovador.GBEmulator {
 							pixelColor = tiles[(uint)n][spriteRow * 8 + xCoordSprite];
 							if (((xPosition + xCoordSprite) >= 0) && ((xPosition + xCoordSprite) < SCREEN_PIXELS_WIDTH)
 								&& pixelColor != 0
-								//&& (priority != 0 || buffer[xCoordBuffer] == colors[0])
+								&& (priority == 0 || buffer[xCoordBuffer] == colors[0])
 							) {
 								buffer[xCoordBuffer] = colors[pixelColor];
 							}
