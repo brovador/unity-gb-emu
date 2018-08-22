@@ -208,6 +208,10 @@ namespace brovador.GBEmulator {
 						tile = tiles[(uint)nTile];
 					}
 
+					if (tile == null) {
+						continue;
+					}
+
 					tileY = (int)(lineY & 7);
 					tileX = (int)(lineX & 7);
 
