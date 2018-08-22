@@ -218,8 +218,8 @@ namespace brovador.GBEmulator {
 
 			if (LCDC_SpriteDisplay) {
 				var oamAddress = 0xFE00;
-				int spriteX = 0;
-				int spriteY = 0;
+				int xPosition = 0;
+				int yPosition = 0;
 				byte n = 0;
 				byte flags = 0;
 				int palette = 0;
@@ -230,8 +230,8 @@ namespace brovador.GBEmulator {
 				int pixelColor = 0;
 
 				for (int i = 0; i < 40; i++) {
-					spriteY = mmu.Read((ushort)(oamAddress + i * 4)) - 16;
-					spriteX = mmu.Read((ushort)(oamAddress + i * 4 + 1)) - 8;
+					yPosition = mmu.Read((ushort)(oamAddress + i * 4)) - 16;
+					xPosition = mmu.Read((ushort)(oamAddress + i * 4 + 1)) - 8;
 					n = mmu.Read((ushort)(oamAddress + i * 4 + 2));
 					flags = mmu.Read((ushort)(oamAddress + i * 4 + 3));
 
@@ -239,7 +239,7 @@ namespace brovador.GBEmulator {
 						continue;
 					}
 
-					if (spriteY <= ly && spriteY + 8 > ly) {
+					if (yPosition <= ly && yPosition + 8 > ly) {
 						
 						palette = (flags & 0x10) == 0 ? 0 : 1;
 						xFlip = (flags & 0x20) == 0 ? false : true;
@@ -248,16 +248,17 @@ namespace brovador.GBEmulator {
 
 						//TODO: check y-flip
 
-						spriteRow = (ly - spriteY);
+						spriteRow = (ly - yPosition);
 
 						for (int x = 0; x < 8; x++) {
-							pixelColor = tiles[(uint)n][spriteRow * 8 + x];
-							if (((spriteX + x) >= 0) && ((spriteX + x) < SCREEN_PIXELS_WIDTH)
+							var xCoordSprite = xFlip ? 7 - x : x;
+							var xCoordBuffer = bufferY + xPosition + x;
+							pixelColor = tiles[(uint)n][spriteRow * 8 + xCoordSprite];
+							if (((xPosition + xCoordSprite) >= 0) && ((xPosition + xCoordSprite) < SCREEN_PIXELS_WIDTH)
 								&& pixelColor != 0
-								//&& (priority != 0 || buffer[bufferY + spriteX + x] == colors[0])
+								//&& (priority != 0 || buffer[xCoordBuffer] == colors[0])
 							) {
-								//TODO: check x-flip
-								buffer[bufferY + spriteX + x] = colors[pixelColor];
+								buffer[xCoordBuffer] = colors[pixelColor];
 							}
 						}
 					}
