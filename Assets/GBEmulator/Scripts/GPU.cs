@@ -108,7 +108,6 @@ namespace brovador.GBEmulator {
 			screenTexture.filterMode = FilterMode.Point;
 		}
 
-
 		public void Step(uint opCycles)
 		{
 			clock += opCycles;
@@ -118,7 +117,7 @@ namespace brovador.GBEmulator {
 			//HBlank
 			case GPUMode.HBlank:
 				if (clock >= HORIZONAL_BLANK_CYCLES) {
-					clock -= (uint)HORIZONAL_BLANK_CYCLES;
+					clock -= HORIZONAL_BLANK_CYCLES;
 					LY++;
 
 					if (LY == (SCREEN_PIXELS_HEIGHT - 1)) {
@@ -147,7 +146,7 @@ namespace brovador.GBEmulator {
 			//OAM Read
 			case GPUMode.OAMRead:
 				if (clock >= SCANLINE_OAM_CYCLES) {
-					clock -= (uint)SCANLINE_OAM_CYCLES;
+					clock -= SCANLINE_OAM_CYCLES;
 					STAT_Mode = GPUMode.VRAMRead;
 				}
 				break;
@@ -155,21 +154,13 @@ namespace brovador.GBEmulator {
 			//VRAM Read
 			case GPUMode.VRAMRead:
 				if (clock >= SCANLINE_VRAM_CYCLES) {
-					clock -= (uint)SCANLINE_VRAM_CYCLES;
+					clock -= SCANLINE_VRAM_CYCLES;
 					STAT_Mode = GPUMode.HBlank;
 					DrawScanline();
 				}
 				break;
 			}
 		}
-
-
-//		Color[] colors = {
-//			new Color(224.0f / 255.0f, 248.0f / 255.0f, 208.0f / 255.0f),
-//			new Color(136.0f / 255.0f, 192.0f / 255.0f, 112.0f / 255.0f),
-//			new Color(52.0f / 255.0f, 104.0f / 255.0f, 86.0f / 255.0f),
-//			new Color(8.0f / 255.0f, 24.0f / 255.0f, 32.0f / 255.0f)
-//		};
 
 		void DrawScanline()
 		{
