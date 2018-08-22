@@ -239,16 +239,18 @@ namespace brovador.GBEmulator {
 						continue;
 					}
 
-					if (yPosition <= ly && yPosition + 8 > ly) {
+					if (ly >= yPosition && yPosition + 8 > ly) {
 						
 						palette = (flags & 0x10) == 0 ? 0 : 1;
 						xFlip = (flags & 0x20) == 0 ? false : true;
 						yFlip = (flags & 0x40) == 0 ? false : true;
 						priority = (flags & 0x80) == 0 ? 0 : 1;
 
-						//TODO: check y-flip
-
 						spriteRow = (ly - yPosition);
+						if (yFlip) {
+							spriteRow = 7 - spriteRow;
+						}
+
 
 						for (int x = 0; x < 8; x++) {
 							var xCoordSprite = xFlip ? 7 - x : x;
