@@ -15,6 +15,7 @@ namespace brovador.GBEmulator {
 		public event System.Action<Emulator> OnEmulatorStep;
 
 		public const float FPS = 59.7f;
+		public const int MAX_FRAMESKIP = 10;
 		public bool skipBios;
 		public TextAsset rom;
 		public Material outputMaterial;
@@ -101,9 +102,10 @@ namespace brovador.GBEmulator {
 			CheckKeys();
 
 			var lastTime = Time.deltaTime;
-			var fps = 1.0f / lastTime;
+			var lastFPS = 1.0f / lastTime;
 
-			var cyclesPerFrame = cpu.clockSpeed / fps;
+			var cyclesPerFrame = cpu.clockSpeed / lastFPS;
+			var frameskip = Mathf.Min(MAX_FRAMESKIP, FPS - Mathf.Min(FPS, cyclesPerFrame));
 			var fTime = cpu.timers.t + cyclesPerFrame;
 
 			while (cpu.timers.t < fTime) {
@@ -112,7 +114,11 @@ namespace brovador.GBEmulator {
 				}
 				var opCycles = cpu.Step();
 				timer.Step(opCycles);
-				gpu.Step(opCycles);
+				if (frameskip == 0) {
+					gpu.Step(opCycles);
+				} else {
+					frameskip--;
+				}
 			}
 		}
 
@@ -186,9 +192,9 @@ namespace brovador.GBEmulator {
 			}
 
 			foreach (var pair in keyMap) {
-				if (Input.GetKeyDown(pair.Key)) {
+				if (Input.GetKey(pair.Key)) {
 					joypad.SetKey(pair.Value, true);	
-				} else if (Input.GetKeyUp(pair.Key)) {
+				} else {
 					joypad.SetKey(pair.Value, false);	
 				}
 			}
