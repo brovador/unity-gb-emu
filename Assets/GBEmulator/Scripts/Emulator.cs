@@ -46,7 +46,7 @@ namespace brovador.GBEmulator {
 		void Update()
 		{
 			if (isOn) {
-				CheckKeys();		
+				EmulatorStep();
 			}
 		}
 
@@ -66,7 +66,6 @@ namespace brovador.GBEmulator {
 				mmu.LoadRom(rom.bytes);
 			}
 
-			StartEmulatorCoroutine();
 			isOn = true;
 
 			if (OnEmulatorOn != null) {
@@ -78,7 +77,6 @@ namespace brovador.GBEmulator {
 		public void TurnOff()
 		{
 			if (!isOn) return;
-			StopEmulatorCoroutine();
 			isOn = false;
 
 			if (OnEmulatorOff != null) {
@@ -100,9 +98,22 @@ namespace brovador.GBEmulator {
 
 		public void EmulatorStep()
 		{
-			var opCycles = cpu.Step();
-			timer.Step(opCycles);
-			gpu.Step(opCycles);
+			CheckKeys();
+
+			var lastTime = Time.deltaTime;
+			var fps = 1.0f / lastTime;
+
+			var cyclesPerFrame = cpu.clockSpeed / fps;
+			var fTime = cpu.timers.t + cyclesPerFrame;
+
+			while (cpu.timers.t < fTime) {
+				if (OnEmulatorStep != null) {
+					OnEmulatorStep(this);
+				}
+				var opCycles = cpu.Step();
+				timer.Step(opCycles);
+				gpu.Step(opCycles);
+			}
 		}
 
 
@@ -154,44 +165,6 @@ namespace brovador.GBEmulator {
 			mmu.Write((ushort)0xFF4B, (byte)0x00);
 
 			mmu.Write((ushort)0xFFFF, (byte)0x00);
-		}
-
-
-		void StartEmulatorCoroutine()
-		{
-			StopEmulatorCoroutine();
-			emulatorStepCoroutine = StartCoroutine(EmulatorCoroutine());
-		}
-
-
-		void StopEmulatorCoroutine()
-		{
-			if (emulatorStepCoroutine != null) {
-				StopCoroutine(emulatorStepCoroutine);
-			}
-		}
-
-
-		public float LastFrameTime { get; private set; }
-		IEnumerator EmulatorCoroutine()
-		{
-			var cyclesPerFrame = cpu.clockSpeed / FPS;
-
-			while (true) {
-				var fTime = cpu.timers.t + cyclesPerFrame;
-				var fStart = Time.realtimeSinceStartup;
-				while (cpu.timers.t < fTime) {
-					if (OnEmulatorStep != null) {
-						OnEmulatorStep(this);
-					}
-					while (paused) {
-						yield return null;
-					}
-					EmulatorStep();
-				}
-				yield return null;
-				LastFrameTime = Time.realtimeSinceStartup - fStart;
-			}
 		}
 
 		#endregion
