@@ -6,10 +6,10 @@ namespace brovador.GBEmulator {
 	public class Timer {
 
 		public enum Speed {
-			clk_262144Hz = 1,
-			clk_65536Hz = 4,
-			clk_16384Hz = 16,
-			clk_4096Hz = 64
+			clk_4096Hz = 1024,
+			clk_262144Hz = 16,
+			clk_65536Hz = 64,
+			clk_16384Hz = 256,
 		}
 
 		public byte DIV {
@@ -72,24 +72,19 @@ namespace brovador.GBEmulator {
 		public void Step(uint opCycles)
 		{
 			clockTmp += opCycles;
-			//1/16 cpu speed: increment main clock
-			if (clockTmp >= 16) {
-				clockTmp -= 16;
-				clock++;
+			dividerClockTmp += opCycles;
 
-				//1/16 Increment divider
-				dividerClockTmp++;
-				if (dividerClockTmp == 16) {
-					dividerClockTmp = 0;
-					DIV++;
-				}
+			//Main clock runs at: 4.194304MHz
 
+			//Divider runs at: 16384Hz
+			if (dividerClockTmp >= 256) {
+				dividerClockTmp -= 256;
+				DIV++;
 			}
 
 			if (IsRunning) {
-				//1/x Increment counter
-				if (clock >= (int)TimerSpeed) {
-					clock = 0;
+				while (clockTmp >= (int)TimerSpeed) {
+					clockTmp -= (uint)TimerSpeed;
 					TIMA++;
 					if (TIMA == 0) {
 						mmu.SetInterrupt(MMU.InterruptType.TimerOverflow);
@@ -97,6 +92,32 @@ namespace brovador.GBEmulator {
 					}
 				}
 			}
+
+//			clockTmp += opCycles;
+//			//1/16 cpu speed: increment main clock
+//			if (clockTmp >= 16) {
+//				clockTmp -= 16;
+//				clock++;
+//
+//				//1/16 Increment divider
+//				dividerClockTmp++;
+//				if (dividerClockTmp == 16) {
+//					dividerClockTmp = 0;
+//					DIV++;
+//				}
+//			}
+//
+//			if (IsRunning) {
+//				//1/x Increment counter
+//				while (clock >= (int)TimerSpeed) {
+//					clock -= (uint)TimerSpeed;
+//					TIMA++;
+//					if (TIMA == 0) {
+//						mmu.SetInterrupt(MMU.InterruptType.TimerOverflow);
+//						TIMA = TMA;
+//					}
+//				}
+//			}
 		}
 	}
 }
