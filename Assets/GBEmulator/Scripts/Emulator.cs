@@ -41,6 +41,8 @@ namespace brovador.GBEmulator {
 			if (outputMaterial != null) {
 				outputMaterial.SetTexture("_MainTex", gpu.screenTexture);
 			}
+
+			InitKeyMap();
 		}
 
 
@@ -188,26 +190,34 @@ namespace brovador.GBEmulator {
 		#endregion
 
 		Dictionary<KeyCode, Joypad.Button> keyMap;
+		List<KeyCode> keys;
+
+		void InitKeyMap()
+		{
+			keyMap = new Dictionary<KeyCode, Joypad.Button>();
+			keyMap[KeyCode.LeftArrow] = Joypad.Button.Left;
+			keyMap[KeyCode.RightArrow] = Joypad.Button.Right;
+			keyMap[KeyCode.UpArrow] = Joypad.Button.Up;
+			keyMap[KeyCode.DownArrow] = Joypad.Button.Down;
+			keyMap[KeyCode.A] = Joypad.Button.A;
+			keyMap[KeyCode.S] = Joypad.Button.B;
+			keyMap[KeyCode.Return] = Joypad.Button.Start;
+			keyMap[KeyCode.Delete] = Joypad.Button.Select;
+
+			keys = new List<KeyCode>();
+			foreach (var kv in keyMap) {
+				keys.Add(kv.Key);
+			}
+		}
 
 		void CheckKeys()
 		{
-			if (keyMap == null) {
-				keyMap = new Dictionary<KeyCode, Joypad.Button>();
-				keyMap[KeyCode.LeftArrow] = Joypad.Button.Left;
-				keyMap[KeyCode.RightArrow] = Joypad.Button.Right;
-				keyMap[KeyCode.UpArrow] = Joypad.Button.Up;
-				keyMap[KeyCode.DownArrow] = Joypad.Button.Down;
-				keyMap[KeyCode.A] = Joypad.Button.A;
-				keyMap[KeyCode.S] = Joypad.Button.B;
-				keyMap[KeyCode.Return] = Joypad.Button.Start;
-				keyMap[KeyCode.Delete] = Joypad.Button.Select;
-			}
-
-			foreach (var pair in keyMap) {
-				if (Input.GetKey(pair.Key)) {
-					joypad.SetKey(pair.Value, true);	
+			for (int i = 0; i < keys.Count; i++) {
+				var key = keys[i];
+				if (Input.GetKey(key)) {
+					joypad.SetKey(keyMap[key], true);	
 				} else {
-					joypad.SetKey(pair.Value, false);	
+					joypad.SetKey(keyMap[key], false);	
 				}
 			}
 		}
