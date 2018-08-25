@@ -262,6 +262,44 @@ namespace brovador.GBEmulator {
 
 				}
 			}
+
+			var wx = WX - 7;
+			var wy = WY;
+			lineY = ly;
+			lineX = 0;
+
+			if (LCDC_WindowDisplay && ly >= wy) {
+				var tileMapAddressOffset = LCDC_WindowTileMap == 0 ? 0x9800 : 0x9C00;
+				var tileMapX = 0;
+				var tileMapY = 0;
+				var tileX = 0;
+				var tileY = 0;
+				var nTile = 0;
+				int[] tile = null;
+
+				for (int i = wx; i < SCREEN_PIXELS_WIDTH; i++) {
+					if (((i - wx) & 7) == 0) {
+						tileMapY = (int)(((ly - wy) >> 3) & 31);
+						tileMapX = (int)(((i - wx) >> 3) & 31);
+						nTile = mmu.Read((ushort)(tileMapAddressOffset + (tileMapY << 5) + tileMapX));
+
+						if (!tiles.ContainsKey((uint)(nTile))) {
+							continue;
+						}
+						tile = tiles[(uint)nTile];
+					}
+
+					if (tile == null) {
+						continue;
+					}
+
+					tileY = (int)(lineY & 7);
+					tileX = (int)(lineX & 7);
+
+					buffer[bufferY + i] = colors[tile[(tileY << 3) + tileX]];
+					lineX++;
+				}
+			}
 		}
 
 		void DrawScreen()
