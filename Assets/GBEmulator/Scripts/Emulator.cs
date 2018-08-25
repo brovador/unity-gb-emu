@@ -47,7 +47,7 @@ namespace brovador.GBEmulator {
 		void Update()
 		{
 			if (isOn) {
-				EmulatorStep();
+				EmulatorFrame();
 			}
 		}
 
@@ -97,8 +97,10 @@ namespace brovador.GBEmulator {
 
 		#region Private
 
-		public void EmulatorStep()
+		public void EmulatorFrame()
 		{
+			if (paused) return;
+
 			CheckKeys();
 
 			var lastTime = Time.deltaTime;
@@ -112,13 +114,23 @@ namespace brovador.GBEmulator {
 				if (OnEmulatorStep != null) {
 					OnEmulatorStep(this);
 				}
-				var opCycles = cpu.Step();
-				timer.Step(opCycles);
-				if (frameskip == 0) {
-					gpu.Step(opCycles);
+
+				if (!paused) {
+					EmulatorStep(frameskip == 0);
+					frameskip -= frameskip > 0 ? 1 : 0;
 				} else {
-					frameskip--;
+					break;
 				}
+			}
+		}
+
+
+		public void EmulatorStep(bool frameskip = false)
+		{
+			var opCycles = cpu.Step();
+			timer.Step(opCycles);
+			if (frameskip) {
+				gpu.Step(opCycles);
 			}
 		}
 
