@@ -282,6 +282,12 @@ namespace brovador.GBEmulator {
 						tileMapY = (int)(((ly - wy) >> 3) & 31);
 						tileMapX = (int)(((i - wx) >> 3) & 31);
 						nTile = mmu.Read((ushort)(tileMapAddressOffset + (tileMapY << 5) + tileMapX));
+						if (LCDC_BGWindowTileData == 0) {
+							if (nTile > 127) {
+								nTile -= 0x100;
+							}
+							nTile = 256 + nTile;
+						}
 
 						if (!tiles.ContainsKey((uint)(nTile))) {
 							continue;
