@@ -230,32 +230,38 @@ namespace brovador.GBEmulator {
 					n = mmu.Read((ushort)(oamAddress + i * 4 + 2));
 					flags = mmu.Read((ushort)(oamAddress + i * 4 + 3));
 
-					if (!tiles.ContainsKey((uint)n)) {
-						continue;
-					}
+					var maxSprites = LCDC_SpriteSize == SpriteSize.Size8x8 ? 1 : 2;
+					for (int j = 0; j < maxSprites; j++) {
 
-					if (ly >= yPosition && yPosition + 8 > ly) {
-						
-						palette = (flags & 0x10) == 0 ? 0 : 1;
-						xFlip = (flags & 0x20) == 0 ? false : true;
-						yFlip = (flags & 0x40) == 0 ? false : true;
-						priority = (flags & 0x80) == 0 ? 0 : 1;
+						n = (byte)(n + j);
+						yPosition = yPosition + 8 * j;
 
-						spriteRow = (ly - yPosition);
-						if (yFlip) {
-							spriteRow = 7 - spriteRow;
+						if (!tiles.ContainsKey((uint)n)) {
+							continue;
 						}
 
+						if (ly >= yPosition && yPosition + 8 > ly) {
+						
+							palette = (flags & 0x10) == 0 ? 0 : 1;
+							xFlip = (flags & 0x20) == 0 ? false : true;
+							yFlip = (flags & 0x40) == 0 ? false : true;
+							priority = (flags & 0x80) == 0 ? 0 : 1;
 
-						for (int x = 0; x < 8; x++) {
-							var xCoordSprite = xFlip ? 7 - x : x;
-							var xCoordBuffer = bufferY + xPosition + x;
-							pixelColor = tiles[(uint)n][spriteRow * 8 + xCoordSprite];
-							if (((xPosition + xCoordSprite) >= 0) && ((xPosition + xCoordSprite) < SCREEN_PIXELS_WIDTH)
-								&& pixelColor != 0
-								&& (priority == 0 || buffer[xCoordBuffer] == colors[0])
-							) {
-								buffer[xCoordBuffer] = colors[pixelColor];
+							spriteRow = (ly - yPosition);
+							if (yFlip) {
+								spriteRow = 7 - spriteRow;
+							}
+
+
+							for (int x = 0; x < 8; x++) {
+								var xCoordSprite = xFlip ? 7 - x : x;
+								var xCoordBuffer = bufferY + xPosition + x;
+								pixelColor = tiles[(uint)n][spriteRow * 8 + xCoordSprite];
+								if (((xPosition + xCoordSprite) >= 0) && ((xPosition + xCoordSprite) < SCREEN_PIXELS_WIDTH)
+								   && pixelColor != 0
+								   && (priority == 0 || buffer[xCoordBuffer] == colors[0])) {
+									buffer[xCoordBuffer] = colors[pixelColor];
+								}
 							}
 						}
 					}
