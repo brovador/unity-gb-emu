@@ -15,7 +15,6 @@ namespace brovador.GBEmulator {
 		public event System.Action<Emulator> OnEmulatorStep;
 
 		public const float FPS = 59.7f;
-		public const int MAX_FRAMESKIP = 10;
 		public bool skipBios;
 		public TextAsset rom;
 		public Material outputMaterial;
@@ -105,11 +104,7 @@ namespace brovador.GBEmulator {
 
 			CheckKeys();
 
-			var lastTime = Time.deltaTime;
-			var lastFPS = 1.0f / lastTime;
-
-			var cyclesPerFrame = cpu.clockSpeed / lastFPS;
-			var frameskip = Mathf.Min(MAX_FRAMESKIP, FPS - Mathf.Min(FPS, cyclesPerFrame));
+			var cyclesPerFrame = cpu.clockSpeed / FPS;
 			var fTime = cpu.timers.t + cyclesPerFrame;
 
 			while (cpu.timers.t < fTime) {
@@ -118,8 +113,7 @@ namespace brovador.GBEmulator {
 				}
 
 				if (!paused) {
-					EmulatorStep(frameskip == 0);
-					frameskip -= frameskip > 0 ? 1 : 0;
+					EmulatorStep();
 				} else {
 					break;
 				}
@@ -131,9 +125,7 @@ namespace brovador.GBEmulator {
 		{
 			var opCycles = cpu.Step();
 			timer.Step(opCycles);
-			if (frameskip) {
-				gpu.Step(opCycles);
-			}
+			gpu.Step(opCycles);
 		}
 
 
