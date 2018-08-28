@@ -34,7 +34,7 @@ namespace brovador.GBEmulator.Debugger {
 			}
 
 			string[] optionTitles = {
-				"BG Map", "Tiles", "OAM", "Palettes"
+				"BG Map", "Tiles"
 			};
 			GUILayoutOption[] options = null;
 			selectedView = GUILayout.Toolbar(selectedView, optionTitles, options);
@@ -47,8 +47,6 @@ namespace brovador.GBEmulator.Debugger {
 				ShowBGMap();
 			} else if (selectedView == 1) {
 				ShowTiles();
-			} else if (selectedView == 2) {
-				ShowScreen();
 			}
 		}
 
@@ -56,16 +54,6 @@ namespace brovador.GBEmulator.Debugger {
 		void OnInspectorUpdate()
 		{
 			this.Repaint();
-		}
-
-
-		void ShowScreen()
-		{
-			DrawTexture(emu.gpu.screenTexture, 
-				GPU.SCREEN_PIXELS_WIDTH, 
-				GPU.SCREEN_PIXELS_HEIGHT,
-				2
-			);
 		}
 
 
