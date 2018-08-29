@@ -42,11 +42,23 @@ namespace brovador.GBEmulator {
 		public SpriteSize LCDC_SpriteSize { get { return (SpriteSize)(mmu.Read(0xFF40) & 0x04); } }
 
 		//FF41(STAT)
-		#warning STAT bits 6-3 not set
-		#warning STAT coincicende flag not set
+		bool STAT_InterruptLYCEnabled { get { return (mmu.Read((ushort)0xFF41) & 0x40) != 0; }}
+		bool STAT_InterruptOAMEnabled { get { return (mmu.Read((ushort)0xFF41) & 0x20) != 0; }}
+		bool STAT_InterruptVBlankEnabled { get { return (mmu.Read((ushort)0xFF41) & 0x10) != 0; }}
+		bool STAT_InterruptHBlankEnabled { get { return (mmu.Read((ushort)0xFF41) & 0x08) != 0; }}
+		bool STAT_CoincidenceFlag {
+			get { return (mmu.Read((ushort)0xFF41) & 0x04) != 0; }
+			set { 
+				var data = mmu.Read((ushort)0xFF41);
+				mmu.Write((ushort)0xFF41, (byte)((data & ~0x04) | (value ? 0x04 : 0x00)));
+			}
+		}
 		GPUMode STAT_Mode {
 			get { return (GPUMode)(mmu.Read((ushort)0xFF41) & 0x03); }
-			set { mmu.Write(0xFF41, (byte)((mmu.Read(0xFF41) & ~0x03) + (byte)value)); }
+			set { 
+				mmu.Write(0xFF41, (byte)((mmu.Read(0xFF41) & ~0x03) + (byte)value)); 
+				CheckLCDInterrupts();
+			}
 		}
 
 		//FF42(SCY)
@@ -58,11 +70,16 @@ namespace brovador.GBEmulator {
 		//FF44(LY)
 		byte LY { 
 			get { return mmu.Read(0xFF44); } 
-			set { mmu.Write(0xFF44, value, true); } 
+			set { 
+				mmu.Write(0xFF44, value, true); 
+				STAT_CoincidenceFlag = (value == this.LYC);
+				if (STAT_CoincidenceFlag && STAT_InterruptLYCEnabled) {
+					mmu.SetInterrupt(MMU.InterruptType.LCDCStatus);
+				}
+			} 
 		}
 
 		//FF45(LYC)
-		#warning LYC set STAT when LY==LYC
 		byte LYC { get { return mmu.Read(0xFF45); } }
 
 		//FF46(DMA)
@@ -114,6 +131,23 @@ namespace brovador.GBEmulator {
 
 			switch (STAT_Mode) {
 
+			//OAM Read
+			case GPUMode.OAMRead:
+				if (clock >= SCANLINE_OAM_CYCLES) {
+					clock -= SCANLINE_OAM_CYCLES;
+					STAT_Mode = GPUMode.VRAMRead;
+				}
+				break;
+
+			//VRAM Read
+			case GPUMode.VRAMRead:
+				if (clock >= SCANLINE_VRAM_CYCLES) {
+					clock -= SCANLINE_VRAM_CYCLES;
+					STAT_Mode = GPUMode.HBlank;
+					DrawScanline();
+				}
+				break;
+
 			//HBlank
 			case GPUMode.HBlank:
 				if (clock >= HORIZONAL_BLANK_CYCLES) {
@@ -142,23 +176,17 @@ namespace brovador.GBEmulator {
 					}
 				}
 				break;
-			
-			//OAM Read
-			case GPUMode.OAMRead:
-				if (clock >= SCANLINE_OAM_CYCLES) {
-					clock -= SCANLINE_OAM_CYCLES;
-					STAT_Mode = GPUMode.VRAMRead;
-				}
-				break;
-			
-			//VRAM Read
-			case GPUMode.VRAMRead:
-				if (clock >= SCANLINE_VRAM_CYCLES) {
-					clock -= SCANLINE_VRAM_CYCLES;
-					STAT_Mode = GPUMode.HBlank;
-					DrawScanline();
-				}
-				break;
+			}
+		}
+
+		void CheckLCDInterrupts()
+		{
+			bool setInterrupt = false;
+			setInterrupt = setInterrupt || (STAT_Mode == GPUMode.HBlank && STAT_InterruptHBlankEnabled);
+			setInterrupt = setInterrupt || (STAT_Mode == GPUMode.VBlank && STAT_InterruptVBlankEnabled);
+			setInterrupt = setInterrupt || (STAT_Mode == GPUMode.OAMRead && STAT_InterruptOAMEnabled);
+			if (setInterrupt) {
+				mmu.SetInterrupt(MMU.InterruptType.LCDCStatus);
 			}
 		}
 
