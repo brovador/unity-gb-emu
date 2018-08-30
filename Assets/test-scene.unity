@@ -338,7 +338,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   writeLog: 0
-  enableBreakPoints: 1
+  enableBreakPoints: 0
   breakPoints:
   - active: 1
     address: 049D
