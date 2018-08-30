@@ -234,7 +234,7 @@ namespace brovador.GBEmulator {
 					tileY = (int)(lineY & 7);
 					tileX = (int)(lineX & 7);
 
-					buffer[bufferY + i] = colors[tile[(tileY << 3) + tileX]];
+					buffer[bufferY + i] = ColorForPalette(BGP, tile[(tileY << 3) + tileX]);
 					lineX++;
 				}
 			}
@@ -245,7 +245,7 @@ namespace brovador.GBEmulator {
 				int yPosition = 0;
 				byte n = 0;
 				byte flags = 0;
-				int palette = 0;
+				byte palette = 0;
 				bool xFlip = false;
 				bool yFlip = false;
 				int priority = 0;
@@ -270,7 +270,7 @@ namespace brovador.GBEmulator {
 
 						if (ly >= yPosition && yPosition + 8 > ly) {
 						
-							palette = (flags & 0x10) == 0 ? 0 : 1;
+							palette = (flags & 0x10) == 0 ? OBP0 : OBP1;
 							xFlip = (flags & 0x20) == 0 ? false : true;
 							yFlip = (flags & 0x40) == 0 ? false : true;
 							priority = (flags & 0x80) == 0 ? 0 : 1;
@@ -288,7 +288,7 @@ namespace brovador.GBEmulator {
 								if (((xPosition + xCoordSprite) >= 0) && ((xPosition + xCoordSprite) < SCREEN_PIXELS_WIDTH)
 								   && pixelColor != 0
 								   && (priority == 0 || buffer[xCoordBuffer] == colors[0])) {
-									buffer[xCoordBuffer] = colors[pixelColor];
+									buffer[xCoordBuffer] = ColorForPalette(palette, pixelColor);
 								}
 							}
 						}
@@ -336,7 +336,7 @@ namespace brovador.GBEmulator {
 					tileY = (int)(lineY & 7);
 					tileX = (int)(lineX & 7);
 
-					buffer[bufferY + i] = colors[tile[(tileY << 3) + tileX]];
+					buffer[bufferY + i] = ColorForPalette(BGP, tile[(tileY << 3) + tileX]);
 					lineX++;
 				}
 			}
@@ -355,6 +355,13 @@ namespace brovador.GBEmulator {
 			new Color(52.0f / 255.0f, 104.0f / 255.0f, 86.0f / 255.0f),
 			new Color(8.0f / 255.0f, 24.0f / 255.0f, 32.0f / 255.0f)
 		};
+
+
+		Color ColorForPalette(byte palette, int colorIdx)
+		{
+			return colors[((palette & (0x03 << (colorIdx * 2))) >> (colorIdx * 2))];
+		}
+
 
 		Dictionary<uint, int[]> tiles = new Dictionary<uint, int[]>();
 		void UpdateTile(uint addr)
