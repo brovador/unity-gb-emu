@@ -17,6 +17,7 @@ namespace brovador.GBEmulator {
 		public const float FPS = 59.7f;
 		public bool skipBios;
 		public TextAsset rom;
+		public Material outputMaterial;
 
 		Coroutine emulatorStepCoroutine;
 		public bool isOn { get; private set; }
@@ -25,13 +26,32 @@ namespace brovador.GBEmulator {
 		[HideInInspector] public CPU cpu;
 		[HideInInspector] public MMU mmu;
 		[HideInInspector] public GPU gpu;
+		[HideInInspector] public Timer timer;
+		[HideInInspector] public Joypad joypad;
 
 		void Init()
 		{
 			mmu = new MMU();
 			cpu = new CPU(mmu);
-			gpu = new GPU(cpu, mmu);
+			gpu = new GPU(mmu);
+			timer = new Timer(mmu);
+			joypad = new Joypad(mmu);
+
+			if (outputMaterial != null) {
+				outputMaterial.SetTexture("_MainTex", gpu.screenTexture);
+			}
+
+			InitKeyMap();
 		}
+
+
+		void Update()
+		{
+			if (isOn) {
+				EmulatorFrame();
+			}
+		}
+
 
 		#region Public
 
@@ -48,7 +68,6 @@ namespace brovador.GBEmulator {
 				mmu.LoadRom(rom.bytes);
 			}
 
-			StartEmulatorCoroutine();
 			isOn = true;
 
 			if (OnEmulatorOn != null) {
@@ -60,7 +79,6 @@ namespace brovador.GBEmulator {
 		public void TurnOff()
 		{
 			if (!isOn) return;
-			StopEmulatorCoroutine();
 			isOn = false;
 
 			if (OnEmulatorOff != null) {
@@ -80,10 +98,34 @@ namespace brovador.GBEmulator {
 
 		#region Private
 
-		public void EmulatorStep()
+		public void EmulatorFrame()
 		{
-			cpu.Step();
-			gpu.Step();
+			if (paused) return;
+
+			CheckKeys();
+
+			var cyclesPerFrame = cpu.clockSpeed / FPS;
+			var fTime = cpu.timers.t + cyclesPerFrame;
+
+			while (cpu.timers.t < fTime) {
+				if (OnEmulatorStep != null) {
+					OnEmulatorStep(this);
+				}
+
+				if (!paused) {
+					EmulatorStep();
+				} else {
+					break;
+				}
+			}
+		}
+
+
+		public void EmulatorStep(bool frameskip = false)
+		{
+			var opCycles = cpu.Step();
+			timer.Step(opCycles);
+			gpu.Step(opCycles);
 		}
 
 
@@ -95,80 +137,81 @@ namespace brovador.GBEmulator {
 			cpu.registers.HL = 0x014D;
 			cpu.registers.SP = 0xFFFE;
 			cpu.registers.PC = 0x0100;
-			
-			//Set default register values
-			mmu.Write((UInt16)0xFF05, (byte)0x00);
-			mmu.Write((UInt16)0xFF06, (byte)0x00);
-			mmu.Write((UInt16)0xFF07, (byte)0x00);
-			mmu.Write((UInt16)0xFF10, (byte)0x80);
-			mmu.Write((UInt16)0xFF11, (byte)0xBF);
-			mmu.Write((UInt16)0xFF12, (byte)0xF3);
-			mmu.Write((UInt16)0xFF14, (byte)0xBF);
-			mmu.Write((UInt16)0xFF16, (byte)0x3F);
-			mmu.Write((UInt16)0xFF17, (byte)0x00);
-			mmu.Write((UInt16)0xFF19, (byte)0xBF);
-			mmu.Write((UInt16)0xFF1A, (byte)0x7F);
-			mmu.Write((UInt16)0xFF1B, (byte)0xFF);
-			mmu.Write((UInt16)0xFF1C, (byte)0x9F);
-			mmu.Write((UInt16)0xFF1E, (byte)0xBF);
-			mmu.Write((UInt16)0xFF20, (byte)0xFF);
-			mmu.Write((UInt16)0xFF21, (byte)0x00);
-			mmu.Write((UInt16)0xFF22, (byte)0x00);
-			mmu.Write((UInt16)0xFF23, (byte)0xBF);
-			mmu.Write((UInt16)0xFF24, (byte)0x77);
-			mmu.Write((UInt16)0xFF25, (byte)0xF3);
-			mmu.Write((UInt16)0xFF26, (byte)0xF1);
-			mmu.Write((UInt16)0xFF40, (byte)0x91);
-			mmu.Write((UInt16)0xFF42, (byte)0x00);
-			mmu.Write((UInt16)0xFF43, (byte)0x00);
-			mmu.Write((UInt16)0xFF45, (byte)0x00);
-			mmu.Write((UInt16)0xFF47, (byte)0xFC);
-			mmu.Write((UInt16)0xFF48, (byte)0xFF);
-			mmu.Write((UInt16)0xFF49, (byte)0xFF);
-			mmu.Write((UInt16)0xFF4A, (byte)0x00);
-			mmu.Write((UInt16)0xFF4B, (byte)0x00);
-			mmu.Write((UInt16)0xFFFF, (byte)0x00);
-		}
 
+			//IO default values
+			mmu.Write((ushort)0xFF01, (byte)0x00);
+			mmu.Write((ushort)0xFF02, (byte)0x7E);
+			mmu.Write((ushort)0xFF04, (byte)0xAB);
+			mmu.Write((ushort)0xFF05, (byte)0x00);
+			mmu.Write((ushort)0xFF06, (byte)0x00);
+			mmu.Write((ushort)0xFF07, (byte)0x00);
+			mmu.Write((ushort)0xFF0F, (byte)0xE1);
 
-		void StartEmulatorCoroutine()
-		{
-			StopEmulatorCoroutine();
-			emulatorStepCoroutine = StartCoroutine(EmulatorCoroutine());
-		}
+			mmu.Write((ushort)0xFF10, (byte)0x80);
+			mmu.Write((ushort)0xFF11, (byte)0xBF);
+			mmu.Write((ushort)0xFF12, (byte)0xF3);
+			mmu.Write((ushort)0xFF14, (byte)0xBF);
+			mmu.Write((ushort)0xFF16, (byte)0x3F);
+			mmu.Write((ushort)0xFF17, (byte)0x00);
+			mmu.Write((ushort)0xFF19, (byte)0xBF);
+			mmu.Write((ushort)0xFF1A, (byte)0x7F);
+			mmu.Write((ushort)0xFF1B, (byte)0xFF);
+			mmu.Write((ushort)0xFF1C, (byte)0x9F);
+			mmu.Write((ushort)0xFF1E, (byte)0xBF);
 
+			mmu.Write((ushort)0xFF21, (byte)0x00);
+			mmu.Write((ushort)0xFF22, (byte)0x00);
+			mmu.Write((ushort)0xFF23, (byte)0xBF);
+			mmu.Write((ushort)0xFF24, (byte)0x77);
+			mmu.Write((ushort)0xFF25, (byte)0xF3);
+			mmu.Write((ushort)0xFF26, (byte)0xF1);
 
-		void StopEmulatorCoroutine()
-		{
-			if (emulatorStepCoroutine != null) {
-				StopCoroutine(emulatorStepCoroutine);
-			}
-		}
+			mmu.Write((ushort)0xFF40, (byte)0x91);
+			mmu.Write((ushort)0xFF41, (byte)0x85);
+			mmu.Write((ushort)0xFF42, (byte)0x00);
+			mmu.Write((ushort)0xFF43, (byte)0x00);
+			mmu.Write((ushort)0xFF44, (byte)0x00);
+			mmu.Write((ushort)0xFF45, (byte)0x00);
+			mmu.Write((ushort)0xFF47, (byte)0xFC);
+			mmu.Write((ushort)0xFF4A, (byte)0x00);
+			mmu.Write((ushort)0xFF4B, (byte)0x00);
 
-
-		public float LastFrameTime { get; private set; }
-		IEnumerator EmulatorCoroutine()
-		{
-			#warning Why I need to multiply this???
-			var cyclesPerSecond = cpu.clockSpeed / FPS;
-
-			while (true) {
-				var fTime = cpu.timers.t + cyclesPerSecond;
-				var fStart = Time.realtimeSinceStartup;
-				while (cpu.timers.t < fTime) {
-					if (OnEmulatorStep != null) {
-						OnEmulatorStep(this);
-					}
-					while (paused) {
-						yield return null;
-					}
-					EmulatorStep();
-				}
-				yield return null;
-				LastFrameTime = Time.realtimeSinceStartup - fStart;
-			}
+			mmu.Write((ushort)0xFFFF, (byte)0x00);
 		}
 
 		#endregion
+
+		Dictionary<KeyCode, Joypad.Button> keyMap;
+		List<KeyCode> keys;
+
+		void InitKeyMap()
+		{
+			keyMap = new Dictionary<KeyCode, Joypad.Button>();
+			keyMap[KeyCode.LeftArrow] = Joypad.Button.Left;
+			keyMap[KeyCode.RightArrow] = Joypad.Button.Right;
+			keyMap[KeyCode.UpArrow] = Joypad.Button.Up;
+			keyMap[KeyCode.DownArrow] = Joypad.Button.Down;
+			keyMap[KeyCode.A] = Joypad.Button.A;
+			keyMap[KeyCode.S] = Joypad.Button.B;
+			keyMap[KeyCode.Return] = Joypad.Button.Start;
+			keyMap[KeyCode.Delete] = Joypad.Button.Select;
+
+			keys = new List<KeyCode>();
+			foreach (var kv in keyMap) {
+				keys.Add(kv.Key);
+			}
+		}
+
+		void CheckKeys()
+		{
+			for (int i = 0; i < keys.Count; i++) {
+				var key = keys[i];
+				if (Input.GetKey(key)) {
+					joypad.SetKey(keyMap[key], true);	
+				} else {
+					joypad.SetKey(keyMap[key], false);	
+				}
+			}
+		}
 	}
 }
