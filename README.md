@@ -1,6 +1,6 @@
 # Unity-GB-Emu
 
-Unity Gameboy Emulator written for Unity written in C#.
+Unity Gameboy Emulator written in C#.
 
 ## Current version: 0.1
 
