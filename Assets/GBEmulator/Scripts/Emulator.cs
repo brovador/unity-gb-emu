@@ -15,7 +15,6 @@ namespace brovador.GBEmulator {
 		public event System.Action<Emulator> OnEmulatorStep;
 
 		public const float FPS = 59.7f;
-		public bool skipBios;
 		public TextAsset rom;
 		public Material outputMaterial;
 
@@ -28,6 +27,7 @@ namespace brovador.GBEmulator {
 		[HideInInspector] public GPU gpu;
 		[HideInInspector] public Timer timer;
 		[HideInInspector] public Joypad joypad;
+		bool skipBios = true;
 
 		void Init()
 		{
